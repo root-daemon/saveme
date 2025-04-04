@@ -14,44 +14,26 @@ import { Connect } from "../../components/wallet/Connect";
 import BlurText from "../../components/animated/BlurText";
 import CircularText from "../../components/animated/Circular";
 import RotatingText from "../../components/animated/Rotate";
+import { useCryptoPrice } from "../../hooks/useCryptoPrice";
 
 export default function WalletDashboard() {
   const [isConnected, setIsConnected] = useState(false);
+  const { prices, loading, error } = useCryptoPrice();
 
-  const mockWallet = {
-    address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-    balance: {
-      eth: 3.45,
-      btc: 0.12,
-      link: 150,
-      dot: 75,
-    },
-    transactions: [
-      {
-        id: 1,
-        type: "Received",
-        amount: 0.5,
-        token: "ETH",
-        date: "2023-04-01",
-        from: "0x123...456",
-      },
-      {
-        id: 2,
-        type: "Sent",
-        amount: 0.1,
-        token: "BTC",
-        date: "2023-03-28",
-        to: "0x789...012",
-      },
-      {
-        id: 3,
-        type: "Received",
-        amount: 25,
-        token: "LINK",
-        date: "2023-03-25",
-        from: "0x345...678",
-      },
-    ],
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
+
+  const getCryptoPrice = (symbol: string) => {
+    const crypto = prices.find(
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+    );
+    return crypto ? formatPrice(crypto.price) : "Loading...";
   };
 
   return (
@@ -118,7 +100,7 @@ export default function WalletDashboard() {
               </div>
               <div>
                 <h3 className="text-xl font-medium text-white">Ethereum</h3>
-                <p className="text-foreground">{mockWallet.balance.eth} ETH</p>
+                <p className="text-foreground">{getCryptoPrice("ETH")}</p>
               </div>
             </div>
           </div>
@@ -130,7 +112,7 @@ export default function WalletDashboard() {
               </div>
               <div>
                 <h3 className="text-xl font-medium text-white">Bitcoin</h3>
-                <p className="text-foreground">{mockWallet.balance.btc} BTC</p>
+                <p className="text-foreground">{getCryptoPrice("BTC")}</p>
               </div>
             </div>
           </div>
@@ -142,9 +124,7 @@ export default function WalletDashboard() {
               </div>
               <div>
                 <h3 className="text-xl font-medium text-white">Chainlink</h3>
-                <p className="text-foreground">
-                  {mockWallet.balance.link} LINK
-                </p>
+                <p className="text-foreground">{getCryptoPrice("LINK")}</p>
               </div>
             </div>
           </div>
@@ -156,7 +136,7 @@ export default function WalletDashboard() {
               </div>
               <div>
                 <h3 className="text-xl font-medium text-white">Polkadot</h3>
-                <p className="text-foreground">{mockWallet.balance.dot} DOT</p>
+                <p className="text-foreground">{getCryptoPrice("DOT")}</p>
               </div>
             </div>
           </div>
@@ -174,34 +154,49 @@ export default function WalletDashboard() {
         />
 
         <div className="bg-background/20 backdrop-blur-sm rounded-lg border border-foreground/10">
-          {mockWallet.transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex items-center justify-between p-6 border-b border-foreground/10 last:border-0"
-            >
-              <div className="flex items-center gap-4">
-                <div className="bg-foreground/10 p-3 rounded-full">
-                  {tx.type === "Received" ? (
-                    <FaChevronRight className="text-green-400" />
-                  ) : (
-                    <FaExchangeAlt className="text-blue-400" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium text-white">{tx.type}</h3>
-                  <p className="text-foreground text-sm">{tx.date}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-white font-medium">
-                  {tx.amount} {tx.token}
-                </p>
-                <p className="text-foreground text-sm">
-                  {tx.type === "Received" ? "From: " + tx.from : "To: " + tx.to}
-                </p>
-              </div>
+          {loading ? (
+            <div className="p-6 text-center text-white">
+              Loading transactions...
             </div>
-          ))}
+          ) : error ? (
+            <div className="p-6 text-center text-red-500">{error}</div>
+          ) : (
+            Array(3)
+              .fill(null)
+              .map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-6 border-b border-foreground/10 last:border-0"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-foreground/10 p-3 rounded-full">
+                      {index % 2 === 0 ? (
+                        <FaChevronRight className="text-green-400" />
+                      ) : (
+                        <FaExchangeAlt className="text-blue-400" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-medium text-white">
+                        {index % 2 === 0 ? "Received" : "Sent"}
+                      </h3>
+                      <p className="text-foreground text-sm">
+                        {new Date().toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white font-medium">
+                      {formatPrice(Math.random() * 1000)}
+                    </p>
+                    <p className="text-foreground text-sm">
+                      {index % 2 === 0 ? "From: " : "To: "}0x...
+                      {Math.random().toString(16).slice(2, 6)}
+                    </p>
+                  </div>
+                </div>
+              ))
+          )}
         </div>
       </section>
 
