@@ -17,27 +17,145 @@ import BlurText from "../../components/animated/BlurText";
 import CircularText from "../../components/animated/Circular";
 import RotatingText from "../../components/animated/Rotate";
 import { useCryptoPrice } from "../../hooks/useCryptoPrice";
-import { useWallet } from "../../hooks/useWallet";
-import { useAccount } from "wagmi";
 import { EXAMPLE_TOKENS } from "../../lib/contract";
+import { useAccount } from "wagmi";
+import {
+  useWalletFunctions,
+  useGetUserTokens,
+  useGetTokenBalance,
+  useAddToken,
+  useRemoveToken,
+} from "../../hooks/useContractFunctions";
 
+// Example of a component using the individual hooks
+const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
+  const { balance, isLoading, isError } = useGetTokenBalance(tokenAddress);
+
+  if (isLoading) return <span className="text-white">Loading...</span>;
+  if (isError)
+    return <span className="text-red-400">Error loading balance</span>;
+
+  return <span className="text-white">Balance: {balance}</span>;
+};
+
+// Example of a component for adding tokens
+const AddTokenForm = () => {
+  const [tokenAddress, setTokenAddress] = useState("");
+  const [amount, setAmount] = useState("");
+  const { addToken, isPending, isSuccess, isError } = useAddToken();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (tokenAddress && amount) {
+      addToken(tokenAddress as `0x${string}`, amount);
+      if (isSuccess) {
+        setTokenAddress("");
+        setAmount("");
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-foreground mb-2">Token Address</label>
+        <input
+          type="text"
+          placeholder="0x..."
+          value={tokenAddress}
+          onChange={(e) => setTokenAddress(e.target.value)}
+          className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
+        />
+      </div>
+      <div>
+        <label className="block text-foreground mb-2">Amount</label>
+        <input
+          type="text"
+          placeholder="0.0"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={isPending || !tokenAddress || !amount}
+        className={`w-full bg-foreground text-background rounded-lg p-3 hover:opacity-90 transition-colors ${
+          isPending || !tokenAddress || !amount
+            ? "opacity-50 cursor-not-allowed"
+            : ""
+        }`}
+      >
+        {isPending ? "Processing..." : "Add Token"}
+      </button>
+      {isSuccess && <p className="text-green-400">Token added successfully!</p>}
+      {isError && <p className="text-red-400">Error adding token</p>}
+    </form>
+  );
+};
+
+// Example of a component for removing tokens
+const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
+  const [amount, setAmount] = useState("");
+  const { removeToken, isPending, isSuccess, isError } = useRemoveToken();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (amount) {
+      removeToken(tokenAddress, amount);
+      if (isSuccess) {
+        setAmount("");
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-foreground mb-2">Amount to Remove</label>
+        <input
+          type="text"
+          placeholder="0.0"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={isPending || !amount}
+        className={`w-full bg-red-500 text-white rounded-lg p-3 hover:opacity-90 transition-colors ${
+          isPending || !amount ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        {isPending ? "Processing..." : "Remove Token"}
+      </button>
+      {isSuccess && (
+        <p className="text-green-400">Token removed successfully!</p>
+      )}
+      {isError && <p className="text-red-400">Error removing token</p>}
+    </form>
+  );
+};
+
+// Main wallet dashboard using the unified wallet hook
 export default function WalletDashboard() {
-  const { isConnected } = useAccount();
-  const {
-    prices,
-    loading: pricesLoading,
-    error: pricesError,
-  } = useCryptoPrice();
   const {
     userTokens,
     tokenBalances,
     isLoading: walletLoading,
     addToken,
     removeToken,
-    isAddTokenPending,
-    isRemoveTokenPending,
-    formatBalance,
-  } = useWallet();
+    isAddPending,
+    isRemovePending,
+    isConnected,
+  } = useWalletFunctions();
+
+  const {
+    prices,
+    loading: pricesLoading,
+    error: pricesError,
+  } = useCryptoPrice();
 
   const [tokenAddress, setTokenAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -68,11 +186,11 @@ export default function WalletDashboard() {
     const token = tokenBalances.find(
       (t) => t.token.toLowerCase() === address.toLowerCase()
     );
-    return token ? formatBalance(token.balance) : "0";
+    return token ? token.balance : "0";
   };
 
   const handleAddToken = () => {
-    if (tokenAddress && amount && !isAddTokenPending) {
+    if (tokenAddress && amount && !isAddPending) {
       addToken(tokenAddress as `0x${string}`, amount);
       setTokenAddress("");
       setAmount("");
@@ -81,7 +199,7 @@ export default function WalletDashboard() {
   };
 
   const handleRemoveToken = () => {
-    if (selectedToken && removeAmount && !isRemoveTokenPending) {
+    if (selectedToken && removeAmount && !isRemovePending) {
       removeToken(selectedToken as `0x${string}`, removeAmount);
       setSelectedToken("");
       setRemoveAmount("");
@@ -131,6 +249,12 @@ export default function WalletDashboard() {
           <FaWallet className="text-white opacity-30 absolute text-7xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         </div>
       </div>
+
+      {/* User Tokens Section - Using the useGetUserTokens hook */}
+      <section className="mb-12">
+        <h3 className="text-2xl font-semibold text-white mb-5">Your Tokens</h3>
+        <UserTokensList />
+      </section>
 
       {/* Balance Overview Section */}
       <section className="mb-24">
@@ -185,9 +309,8 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <span className="text-white">
-                  Balance: {getTokenBalanceByAddress(EXAMPLE_TOKENS.ETH)} ETH
-                </span>
+                {/* Using TokenBalance component for ETH */}
+                <TokenBalance tokenAddress={EXAMPLE_TOKENS.ETH} />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.ETH)}
                   className="text-red-400 hover:text-red-300"
@@ -208,9 +331,8 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <span className="text-white">
-                  Balance: {getTokenBalanceByAddress(EXAMPLE_TOKENS.BTC)} BTC
-                </span>
+                {/* Using TokenBalance component for BTC */}
+                <TokenBalance tokenAddress={EXAMPLE_TOKENS.BTC} />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.BTC)}
                   className="text-red-400 hover:text-red-300"
@@ -231,9 +353,8 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <span className="text-white">
-                  Balance: {getTokenBalanceByAddress(EXAMPLE_TOKENS.LINK)} LINK
-                </span>
+                {/* Using TokenBalance component for LINK */}
+                <TokenBalance tokenAddress={EXAMPLE_TOKENS.LINK} />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.LINK)}
                   className="text-red-400 hover:text-red-300"
@@ -254,9 +375,8 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                <span className="text-white">
-                  Balance: {getTokenBalanceByAddress(EXAMPLE_TOKENS.DOT)} DOT
-                </span>
+                {/* Using TokenBalance component for DOT */}
+                <TokenBalance tokenAddress={EXAMPLE_TOKENS.DOT} />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.DOT)}
                   className="text-red-400 hover:text-red-300"
@@ -356,7 +476,7 @@ export default function WalletDashboard() {
         </div>
       </section>
 
-      {/* Add Token Modal */}
+      {/* Add Token Modal - Using the individual AddTokenForm component */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div
@@ -366,54 +486,18 @@ export default function WalletDashboard() {
             <h2 className="text-2xl font-semibold text-white mb-6">
               Add Token
             </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-foreground mb-2">
-                  Token Address
-                </label>
-                <input
-                  type="text"
-                  placeholder="0x..."
-                  value={tokenAddress}
-                  onChange={(e) => setTokenAddress(e.target.value)}
-                  className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-foreground mb-2">Amount</label>
-                <input
-                  type="text"
-                  placeholder="0.0"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
-                />
-              </div>
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 bg-background text-white border border-foreground/20 rounded-lg p-3 hover:bg-foreground/10 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddToken}
-                  disabled={isAddTokenPending || !tokenAddress || !amount}
-                  className={`flex-1 bg-foreground text-background rounded-lg p-3 hover:opacity-90 transition-colors ${
-                    isAddTokenPending || !tokenAddress || !amount
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
-                >
-                  {isAddTokenPending ? "Processing..." : "Add Token"}
-                </button>
-              </div>
-            </div>
+            <AddTokenForm />
+            <button
+              onClick={() => setIsAddModalOpen(false)}
+              className="mt-4 w-full bg-background text-white border border-foreground/20 rounded-lg p-3 hover:bg-foreground/10 transition-colors"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
-      {/* Remove Token Modal */}
+      {/* Remove Token Modal - Using the individual RemoveTokenForm component */}
       {isRemoveModalOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div
@@ -423,50 +507,24 @@ export default function WalletDashboard() {
             <h2 className="text-2xl font-semibold text-white mb-6">
               Remove Token
             </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-foreground mb-2">
-                  Token Address
-                </label>
-                <input
-                  type="text"
-                  value={selectedToken}
-                  readOnly
-                  className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-foreground mb-2">Amount</label>
-                <input
-                  type="text"
-                  placeholder="0.0"
-                  value={removeAmount}
-                  onChange={(e) => setRemoveAmount(e.target.value)}
-                  className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
-                />
-              </div>
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={() => setIsRemoveModalOpen(false)}
-                  className="flex-1 bg-background text-white border border-foreground/20 rounded-lg p-3 hover:bg-foreground/10 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleRemoveToken}
-                  disabled={
-                    isRemoveTokenPending || !selectedToken || !removeAmount
-                  }
-                  className={`flex-1 bg-red-500 text-white rounded-lg p-3 hover:opacity-90 transition-colors ${
-                    isRemoveTokenPending || !selectedToken || !removeAmount
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
-                >
-                  {isRemoveTokenPending ? "Processing..." : "Remove Token"}
-                </button>
-              </div>
+            <div className="mb-4">
+              <label className="block text-foreground mb-2">
+                Token Address
+              </label>
+              <input
+                type="text"
+                value={selectedToken}
+                readOnly
+                className="w-full bg-background/50 border border-foreground/20 rounded-lg p-3 text-white"
+              />
             </div>
+            <RemoveTokenForm tokenAddress={selectedToken as `0x${string}`} />
+            <button
+              onClick={() => setIsRemoveModalOpen(false)}
+              className="mt-4 w-full bg-background text-white border border-foreground/20 rounded-lg p-3 hover:bg-foreground/10 transition-colors"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -479,5 +537,56 @@ export default function WalletDashboard() {
         </p>
       </footer>
     </main>
+  );
+}
+
+// User Tokens List Component - Using the useGetUserTokens hook
+function UserTokensList() {
+  const { userTokens, isLoading, isError, error } = useGetUserTokens();
+  const { isConnected } = useAccount();
+
+  if (!isConnected) {
+    return (
+      <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10 text-center">
+        Connect your wallet to view your tokens
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10 text-center">
+        <p className="text-white">Loading tokens...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10 text-center">
+        <p className="text-red-400">Error loading tokens: {error?.message}</p>
+      </div>
+    );
+  }
+
+  if (userTokens.length === 0) {
+    return (
+      <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10 text-center">
+        <p className="text-white">No tokens found in your wallet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
+      <ul className="divide-y divide-foreground/10">
+        {userTokens.map((token, index) => (
+          <li key={index} className="py-3 flex justify-between items-center">
+            <span className="text-white font-mono">{token}</span>
+            <TokenBalance tokenAddress={token} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
