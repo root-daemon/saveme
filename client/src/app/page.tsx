@@ -60,8 +60,8 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-foreground/10 p-3 rounded-full">
-                <FaShieldAlt className="text-white text-xl" />
+              <div className="bg-foreground/10 group hover:bg-foreground p-3 rounded-full  transition-all duration-150">
+                <FaShieldAlt className="text-white text-xl group-hover:text-background transition-all duration-150" />
               </div>
               <h3 className="text-xl font-medium text-white">
                 Real-Time Anomaly Detection
@@ -75,8 +75,8 @@ export default function Home() {
 
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-foreground/10 p-3 rounded-full">
-                <FaRocket className="text-white text-xl" />
+              <div className="bg-foreground/10 group hover:bg-foreground p-3 rounded-full  transition-all duration-150">
+                <FaRocket className="text-white text-xl group-hover:text-background transition-all duration-150" />
               </div>
               <h3 className="text-xl font-medium text-white">
                 Self-Destruct Mechanism
@@ -90,8 +90,8 @@ export default function Home() {
 
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-foreground/10 p-3 rounded-full">
-                <FaLock className="text-white text-xl" />
+              <div className="bg-foreground/10 group hover:bg-foreground p-3 rounded-full  transition-all duration-150">
+                <FaLock className="text-white text-xl group-hover:text-background transition-all duration-150" />
               </div>
               <h3 className="text-xl font-medium text-white">
                 Smart Contract Security
@@ -105,8 +105,8 @@ export default function Home() {
 
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-foreground/10 p-3 rounded-full">
-                <FaEthereum className="text-white text-xl" />
+              <div className="bg-foreground/10 group hover:bg-foreground p-3 rounded-full  transition-all duration-150">
+                <FaEthereum className="text-white text-xl group-hover:text-background transition-all duration-150" />
               </div>
               <h3 className="text-xl font-medium text-white">
                 Transparent & Trustworthy
