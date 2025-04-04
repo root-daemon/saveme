@@ -37,3 +37,9 @@ a {
   --color-background: #051008;
   --color-foreground: #8DDCA4;
 }
+
+@layer components {
+  .shadow-foreground\/15 {
+    box-shadow: 0 4px 6px rgba(141, 220, 164, 0.15);
+  }
+}

@@ -2,6 +2,8 @@ import React from 'react'
 import BlurText from '../components/animated/BlurText'
 import CircularText from '../components/animated/Circular'
 import { FaEthereum } from 'react-icons/fa'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { Connect } from '../components/wallet/Connect'
 
 export default function Home() {
   return (
@@ -25,6 +27,8 @@ export default function Home() {
             direction="top"
             className="text-7xl font-semibold mb-1 text-foreground"
           />
+
+          <Connect />
         </div>
         <div className='relative'>
           <CircularText
