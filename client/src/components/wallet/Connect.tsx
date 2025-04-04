@@ -58,7 +58,7 @@ export const Connect = () => {
                                 <div className="flex gap-3 bg-[rgba(5,16,8,0.7)] p-1 rounded-xl ">
                                     <button
                                         onClick={openChainModal}
-                                        
+
                                         type="button"
                                     >
                                         <img
@@ -70,7 +70,7 @@ export const Connect = () => {
                                     <button
                                         onClick={openAccountModal}
                                         type="button"
-                                        className="bg-foreground font-mono text-sm rounded-lg px-4 py-2 font-medium transition-all min-w-[8rem] text-center"
+                                        className="bg-foreground text-background font-mono text-sm rounded-lg px-4 py-2 font-medium transition-all min-w-[8rem] text-center"
                                     >
                                         {account.displayName}
                                     </button>
