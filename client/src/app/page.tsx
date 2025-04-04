@@ -3,29 +3,29 @@ import BlurText from "../components/animated/BlurText";
 import CircularText from "../components/animated/Circular";
 import { FaEthereum, FaShieldAlt, FaRocket, FaLock } from "react-icons/fa";
 import { Connect } from "../components/wallet/Connect";
+import RotatingText from "../components/animated/Rotate";
 
 export default function Home() {
   return (
     <main className="bg-background w-screen min-h-screen px-4 md:px-8 lg:px-32 py-16 md:py-32">
-      {/* Hero Section */}
       <div className="flex flex-col lg:flex-row items-center w-full justify-between gap-12 mb-24">
         <div>
           <BlurText
-            text="Stay Protected."
+            text="Save your funds from"
             delay={0.01}
             animateBy="letters"
             direction="top"
             className="text-4xl md:text-6xl lg:text-7xl font-semibold mb-1 text-white"
           />
           <BlurText
-            text="Stay In Control."
+            text="rug-pull"
             delay={0.05}
             animateBy="letters"
             direction="top"
             className="text-4xl md:text-6xl lg:text-7xl font-semibold mb-6 text-foreground"
           />
 
-          <p className="text-muted-foreground mb-8 max-w-lg text-white">
+          <p className="opacity-40 mb-8 max-w-lg text-white">
             The Self-Destructing Web3 Contract that automatically protects your
             funds from suspicious activity.
           </p>
@@ -43,15 +43,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* How It Works Section */}
-      <section className="mb-24">
-        <BlurText
-          text="How It Works"
-          delay={0.01}
-          animateBy="letters"
-          direction="top"
-          className="text-3xl md:text-4xl font-semibold mb-8 text-white"
-        />
+      <section className="mb-24 mt-48">
+        <h3 className="text-3xl font-semibold text-white mb-5">How we <RotatingText
+          texts={['do it?', 'find it?', 'snap it']}
+          mainClassName="px-2 sm:px-2 md:px-3 bg-foreground inline-flex text-black overflow-hidden py-1 justify-center rounded-lg"
+          staggerFrom={"last"}
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "-120%" }}
+          staggerDuration={0.025}
+          splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+          transition={{ type: "spring", damping: 30, stiffness: 400 }}
+          rotationInterval={2000}
+        /></h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">

@@ -29,7 +29,7 @@ export const Connect = () => {
                                 userSelect: 'none',
                             },
                         })}
-                        className="font-sans font-medium"
+                        className="font-sans font-medium mt-10"
                     >
                         {(() => {
                             if (!connected) {
@@ -37,7 +37,7 @@ export const Connect = () => {
                                     <button
                                         onClick={openConnectModal}
                                         type="button"
-                                        className="bg-background text-foreground border border-foreground rounded-full px-6 mt-10 cursor-pointer py-2 font-medium transition-all min-w-[8rem] text-center hover:bg-foreground hover:text-background hover:translate-y-[-1px] hover:shadow-md hover:shadow-foreground/15"
+                                        className="bg-background text-foreground border border-foreground rounded-full px-6  cursor-pointer py-2 font-medium transition-all min-w-[8rem] text-center hover:bg-foreground hover:text-background hover:translate-y-[-1px] hover:shadow-md hover:shadow-foreground/15"
                                     >
                                         Connect Wallet
                                     </button>
@@ -48,14 +48,14 @@ export const Connect = () => {
                                     <button
                                         onClick={openChainModal}
                                         type="button"
-                                        className="bg-[rgba(235,87,87,0.1)] text-[#eb5757] border border-[#eb5757] rounded-full px-6 mt-10 font-medium transition-all min-w-[8rem] text-center hover:bg-[rgba(235,87,87,0.2)]"
+                                        className="bg-[rgba(235,87,87,0.1)] text-[#eb5757] border border-[#eb5757] rounded-full px-6  font-medium transition-all min-w-[8rem] text-center hover:bg-[rgba(235,87,87,0.2)]"
                                     >
                                         Wrong network
                                     </button>
                                 );
                             }
                             return (
-                                <div className="flex gap-3 bg-[rgba(5,16,8,0.7)] p-1 rounded-xl mt-10">
+                                <div className="flex gap-3 bg-[rgba(5,16,8,0.7)] p-1 rounded-xl ">
                                     <button
                                         onClick={openChainModal}
                                         
