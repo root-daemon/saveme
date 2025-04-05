@@ -34,7 +34,7 @@ const BlurText: React.FC<BlurTextProps> = ({
     const ref = useRef<HTMLParagraphElement>(null);
     const [hasCompleted, setHasCompleted] = useState(false);
 
-    // Default animations based on direction
+    
     const getVariants = (index: number): Variants => {
         const yOffset = direction === 'top' ? -50 : 50;
         const midYOffset = direction === 'top' ? 5 : -5;
@@ -53,7 +53,7 @@ const BlurText: React.FC<BlurTextProps> = ({
                     delay: index * delay,
                     duration: 0.5,
                     ease: easing ? easing : "easeOut",
-                    // Add intermediate steps if animationTo is provided
+                    
                     ...(animationTo ? { times: [0, 0.5, 1] } : {}),
                 }
             }

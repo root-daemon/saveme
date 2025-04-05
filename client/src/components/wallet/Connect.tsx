@@ -3,7 +3,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useWalletContext } from "../../context/WalletContext";
 
 export const Connect = () => {
-  // Using the shared wallet context instead of individual useAccount calls
+  
   const { isConnected } = useWalletContext();
 
   return (

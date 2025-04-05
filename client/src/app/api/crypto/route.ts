@@ -8,7 +8,7 @@ export async function GET() {
         headers: {
           "X-CMC_PRO_API_KEY": process.env.NEXT_PUBLIC_COIN_BACK_API_KEY || "",
         },
-        next: { revalidate: 60 }, // Cache for 60 seconds
+        next: { revalidate: 60 },
       }
     );
 

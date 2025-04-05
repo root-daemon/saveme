@@ -25,6 +25,7 @@ import {
   SiPolkadot,
   SiCardano,
 } from "react-icons/si";
+import { FaArrowRight } from "react-icons/fa";
 
 // Ethererum special address to represent native ETH
 const ETH_ADDRESS =
@@ -403,28 +404,26 @@ export default function TransactionPage() {
       </form>
 
       {/* --- Natural Language Input Section --- */}
-      <div className="mt-6 bg-white/5 rounded-3xl p-6 w-full max-w-md shadow-lg">
-        <h2 className="text-lg font-medium mb-4">Describe Transaction</h2>
-        <div className="flex flex-col gap-4">
-          <textarea
-            placeholder="e.g., Send 0.1 ETH to 0x123... or Transfer 50 USDC to vitalik.eth"
+      <div className="fixed bottom-12 w-full max-w-md">
+        <div className="flex flex-row gap-4 items-center justify-center">
+          <input
+            placeholder="Send 0.1 ETH to 0x123... or Transfer 50 USDC to vitalik.eth"
             value={naturalInput}
             onChange={(e) => setNaturalInput(e.target.value)}
-            className="w-full bg-white/10 rounded-xl px-4 py-3 outline-none resize-none h-24"
-            rows={3}
+            className="w-full bg-white/10 rounded-xl px-4 py-3 outline-none resize-none"
           />
-          {processingError && (
+          {/* {processingError && (
             <div className="p-2 rounded text-sm bg-red-900/30 text-red-200">
               {processingError}
             </div>
-          )}
+          )} */}
           <button
             type="button"
             onClick={handleProcessInput}
             disabled={isProcessing}
-            className="w-full bg-blue-600/50 cursor-pointer text-white py-3 rounded-full font-medium transition hover:bg-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className=" bg-foreground cursor-pointer text-background py-3 w-fit h-fit rounded-full px-5 font-medium transition hover:bg-foreground/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isProcessing ? "Processing..." : "Fill Form from Text"}
+            <FaArrowRight />
           </button>
         </div>
       </div>

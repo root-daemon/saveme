@@ -2,7 +2,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-// Define the schema for the transaction details we want to extract
+
 const transactionSchema = z.object({
   toAddress: z
     .string()
@@ -17,12 +17,12 @@ const transactionSchema = z.object({
     .describe("The symbol of the cryptocurrency (e.g., ETH, USDC, USDT)"),
 });
 
-// Allow requests up to 30 seconds
+
 export const maxDuration = 30;
 
-// Initialize the Google Generative AI provider
+
 const google = createGoogleGenerativeAI({
-   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY, // Reads from env var by default
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY, 
 });
 
 export async function POST(req: Request) {
@@ -37,19 +37,19 @@ export async function POST(req: Request) {
     }
 
     const { object: transactionDetails } = await generateObject({
-      model: google("gemini-2.0-flash-exp"), 
+      model: google("gemini-2.0-flash-exp"),
       schema: transactionSchema,
-      prompt: `Extract the transaction details from the following text: "${inputText}". Identify the recipient address (or ENS name), the amount, and the cryptocurrency symbol. Only return the extracted data in the specified format.`,
+      prompt: `Extract the transaction details from the following text: "${inputText}". Identify the recipient address (or ENS name), the amount, and the cryptocurrency symbol. Only return the extracted data in the specified format. Do not give undefined or unknown in the content`,
     });
 
-    // Respond with the extracted object
+    
     return new Response(JSON.stringify(transactionDetails), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("API Error:", error);
-    // Determine if it's an error we can safely send to the client
+    
     const errorMessage =
       error instanceof Error
         ? error.message

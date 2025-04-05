@@ -33,12 +33,12 @@ import { useTransactionHistory } from "../../hooks/useTransactionHistory";
 import TransactionList from "../../components/wallet/TransactionList";
 import Link from "next/link";
 
-// Example of a component using the individual hooks
+
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const { balance, isLoading, isError } = useGetTokenBalance(tokenAddress);
   const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
 
-  // Use the ethBalance for ETH tokens
+  
   const isEth = tokenAddress === EXAMPLE_TOKENS.ETH;
   const displayBalance = isEth ? ethBalance : balance;
   const displayLoading = isEth ? ethLoading : isLoading;
@@ -50,7 +50,7 @@ const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   return <span className="text-white">{formatBalance(displayBalance)}</span>;
 };
 
-// Enhanced token display component that shows both USD value and token amount
+
 const TokenDisplay = ({
   token,
   symbol,
@@ -61,15 +61,15 @@ const TokenDisplay = ({
   price: number;
 }) => {
   const { balance, isLoading } = useGetTokenBalance(token);
-  // For ETH, we can use the direct balance from the wallet
+  
   const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
 
-  // Use ethBalance directly for ETH tokens
+  
   const isEth = token === EXAMPLE_TOKENS.ETH;
   const displayBalance = isEth ? ethBalance : balance;
   const displayLoading = isEth ? ethLoading : isLoading;
 
-  // Calculate USD value
+  
   const usdValue = !displayLoading ? parseFloat(displayBalance) * price : 0;
 
   if (displayLoading) return <span className="text-white">Loading...</span>;
@@ -86,7 +86,7 @@ const TokenDisplay = ({
   );
 };
 
-// Example of a component for adding tokens
+
 const AddTokenForm = () => {
   const [tokenAddress, setTokenAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -142,7 +142,7 @@ const AddTokenForm = () => {
   );
 };
 
-// Example of a component for removing tokens
+
 const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const [amount, setAmount] = useState("");
   const { removeToken, isPending, isSuccess, isError } = useRemoveToken();
@@ -186,7 +186,7 @@ const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   );
 };
 
-// Main wallet dashboard using the unified wallet hook
+
 export default function WalletDashboard() {
   const {
     tokens,
@@ -583,7 +583,7 @@ export default function WalletDashboard() {
   );
 }
 
-// User Tokens List Component - Using the useGetUserTokens hook
+
 function UserTokensList() {
   const { tokens, isLoading, isError, error } = useGetUserTokens();
   const { isConnected } = useWalletContext();

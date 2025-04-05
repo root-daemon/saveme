@@ -11,24 +11,24 @@ import { useWalletContext } from "../context/WalletContext";
 
 type Address = `0x${string}`;
 
-// Helper function to format balances nicely
+
 export const formatBalance = (
   balance: string | undefined,
   decimals = 4
 ): string => {
   if (!balance) return "0";
 
-  // Convert scientific notation to fixed notation
+  
   const num = parseFloat(balance);
   if (num === 0) return "0";
 
   const formattedBalance = num.toFixed(decimals);
 
-  // Remove trailing zeros
+  
   return formattedBalance.replace(/\.?0+$/, "");
 };
 
-// Hook for getting native ETH balance
+
 export function useNativeBalance() {
   const { address, isConnected } = useWalletContext();
 
@@ -52,7 +52,7 @@ export function useNativeBalance() {
   };
 }
 
-// Hook for getting user tokens
+
 export function useGetUserTokens() {
   const { address, isConnected } = useWalletContext();
 
@@ -82,7 +82,7 @@ export function useGetUserTokens() {
   };
 }
 
-// Hook for getting token balance
+
 export function useGetTokenBalance(tokenAddress?: Address) {
   const { address, isConnected } = useWalletContext();
 
@@ -112,7 +112,7 @@ export function useGetTokenBalance(tokenAddress?: Address) {
   };
 }
 
-// Hook for adding tokens
+
 export function useAddToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -129,7 +129,7 @@ export function useAddToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      // Reset after a delay
+      
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -165,7 +165,7 @@ export function useAddToken() {
   };
 }
 
-// Hook for removing tokens
+
 export function useRemoveToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -182,7 +182,7 @@ export function useRemoveToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      // Reset after a delay
+      
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -218,7 +218,7 @@ export function useRemoveToken() {
   };
 }
 
-// Hook for transferring tokens
+
 export function useTransferToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -235,7 +235,7 @@ export function useTransferToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      // Reset after a delay
+      
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -275,7 +275,7 @@ export function useTransferToken() {
   };
 }
 
-// Hook for getting all balances
+
 export function useGetAllBalances() {
   const { tokens, isLoading: tokensLoading } = useGetUserTokens();
   const {
@@ -288,7 +288,7 @@ export function useGetAllBalances() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const { address, isConnected } = useWalletContext();
-  const ETH_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address; // From EXAMPLE_TOKENS.ETH
+  const ETH_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address; 
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -304,22 +304,22 @@ export function useGetAllBalances() {
         let balances: { token: Address; balance: string; symbol: string }[] =
           [];
 
-        // Always include ETH with real balance from wagmi
-        // Use the actual balance from MetaMask/RainbowKit
+        
+        
         balances.push({
           token: ETH_ADDRESS,
-          balance: ethBalance, // Real ETH balance
+          balance: ethBalance, 
           symbol: ethSymbol || "ETH",
         });
 
-        // Add other tokens with dummy data if any exist
+        
         if (tokens && tokens.length > 0) {
-          // Filter out ETH as we already added it
+          
           const otherTokens = tokens.filter(
             (token) => token.toLowerCase() !== ETH_ADDRESS.toLowerCase()
           );
 
-          // Add dummy data for other tokens
+          
           const dummyBalances = otherTokens.map((token) => ({
             token,
             balance:
@@ -329,7 +329,7 @@ export function useGetAllBalances() {
                 ? "1.25"
                 : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
                 ? "10.5"
-                : "0.01", // Better dummy values
+                : "0.01", 
             symbol:
               token === "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
                 ? "BTC"
@@ -360,7 +360,7 @@ export function useGetAllBalances() {
   };
 }
 
-// Unified hook for wallet functionality
+
 export function useWalletFunctions() {
   const { tokens, userTokens, refetch: refetchTokens } = useGetUserTokens();
   const {
@@ -376,7 +376,7 @@ export function useWalletFunctions() {
   const { tokenBalances, isLoading } = useGetAllBalances();
   const { address, isConnected } = useWalletContext();
 
-  // Refresh data when operations succeed
+  
   useEffect(() => {
     if (isAddSuccess || isRemoveSuccess) {
       refetchTokens();
@@ -397,7 +397,7 @@ export function useWalletFunctions() {
   };
 }
 
-// Hook for sending native ETH
+
 export function useSendTransaction() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -414,7 +414,7 @@ export function useSendTransaction() {
   useEffect(() => {
     if (wagmiIsSuccess) {
       setIsSuccess(true);
-      // Reset after a delay
+      
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);

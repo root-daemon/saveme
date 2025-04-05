@@ -12,19 +12,19 @@ export interface Transaction {
   isIncoming: boolean;
 }
 
-// This hook fetches transaction history for the connected wallet
+
 export function useTransactionHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Use both wagmi's useAccount and our custom context for better compatibility
+  
   const wagmiAccount = useAccount();
   const { address, isConnected } = useWalletContext();
   const publicClient = usePublicClient();
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
-  // Use the first available address
+  
   const walletAddress = address || wagmiAccount.address;
 
   useEffect(() => {
@@ -40,26 +40,26 @@ export function useTransactionHistory() {
       setError(null);
 
       try {
-        // Set a reasonable lookback for demonstration
-        // In production, this might be paginated or use an external API/indexer
+        
+        
         const lookbackBlocks = 10;
         const blockRange = Math.min(Number(blockNumber), lookbackBlocks);
 
-        // Track successfully processed blocks to handle errors gracefully
+        
         const processedTxs: Transaction[] = [];
 
-        // Process each block one by one to handle potential errors better
+        
         for (let i = 0; i < blockRange; i++) {
           try {
             const blockNum = BigInt(Number(blockNumber) - i);
 
-            // Get the block with full transaction objects
+            
             const block = await publicClient.getBlock({
               blockNumber: blockNum,
               includeTransactions: true,
             });
 
-            // Skip if we don't have transaction objects
+            
             if (
               !block.transactions ||
               typeof block.transactions[0] === "string"
@@ -67,7 +67,7 @@ export function useTransactionHistory() {
               continue;
             }
 
-            // Find transactions related to this address
+            
             for (const tx of block.transactions) {
               if (typeof tx === "string") continue;
 
@@ -94,14 +94,14 @@ export function useTransactionHistory() {
               `Error processing block ${Number(blockNumber) - i}:`,
               blockError
             );
-            // Continue with other blocks even if one fails
+            
           }
         }
 
-        // Safety check in case the component unmounted during async operations
+        
         if (!isMounted) return;
 
-        // Sort by timestamp (newest first) and update state
+        
         processedTxs.sort((a, b) => b.timestamp - a.timestamp);
         setTransactions(processedTxs);
       } catch (err) {
@@ -122,7 +122,7 @@ export function useTransactionHistory() {
 
     fetchTransactionHistory();
 
-    // Polling interval for refreshing tx data
+    
     const intervalId = setInterval(fetchTransactionHistory, 30000);
 
     return () => {
@@ -131,12 +131,12 @@ export function useTransactionHistory() {
     };
   }, [walletAddress, publicClient, blockNumber]);
 
-  // Return dummy data for testing with a special flag
-  // This helps distinguish if the fetching logic is working or not
+  
+  
   const useDummyData = false;
 
   if (useDummyData) {
-    // Return 3 dummy transactions for testing UI
+    
     const now = Math.floor(Date.now() / 1000);
     const dummyTxs: Transaction[] = [
       {

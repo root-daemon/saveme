@@ -21,7 +21,6 @@ export function useWallet() {
   const [tokenBalances, setTokenBalances] = useState<TokenBalance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Read user tokens
   const {
     data: tokensData,
     isError: isTokensError,
@@ -34,7 +33,6 @@ export function useWallet() {
     account: address,
   });
 
-  // Add token function
   const {
     writeContract: writeAddToken,
     isPending: isAddTokenPending,
@@ -56,7 +54,6 @@ export function useWallet() {
     [address, writeAddToken]
   );
 
-  // Remove token function
   const {
     writeContract: writeRemoveToken,
     isPending: isRemoveTokenPending,
@@ -78,7 +75,6 @@ export function useWallet() {
     [address, writeRemoveToken]
   );
 
-  // Update token balances manually (simpler than using useReadContracts)
   const updateBalances = useCallback(async () => {
     if (!userTokens.length || !address) {
       setTokenBalances([]);
@@ -88,18 +84,15 @@ export function useWallet() {
 
     setIsLoading(true);
 
-    // Simple approach with dummy data for demo purposes
-    // In a real implementation, you'd need to call the contract for each token
     const balances = userTokens.map((token) => ({
       token,
-      balance: "0.01", // Dummy balance for demo
+      balance: "0.01",
     }));
 
     setTokenBalances(balances);
     setIsLoading(false);
   }, [userTokens, address]);
 
-  // Update user tokens from contract data
   useEffect(() => {
     if (tokensData) {
       setUserTokens(tokensData as Address[]);
@@ -110,14 +103,12 @@ export function useWallet() {
     setIsLoading(false);
   }, [tokensData]);
 
-  // Update balances when tokens change
   useEffect(() => {
     if (userTokens.length > 0) {
       updateBalances();
     }
   }, [userTokens, updateBalances]);
 
-  // Watch for contract events to update balances
   useWatchContractEvent({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
@@ -136,7 +127,6 @@ export function useWallet() {
     },
   });
 
-  // Refresh data when transaction succeeds
   useEffect(() => {
     if (isAddTokenSuccess || isRemoveTokenSuccess) {
       refetchTokens();
