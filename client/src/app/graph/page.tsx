@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, ChevronDown, AlertTriangle } from 'lucide-react';
 import { FaEthereum } from 'react-icons/fa';
+import TradingAgentsPanel from '@/src/components/TradingAgentsPanel';
+import TradeNotifications from '@/src/components/TradeNotifications';
+import { useTradingAgents } from '@/src/hooks/useTradingAgents';
 
 interface CandlestickData {
   date: string;
@@ -165,17 +168,43 @@ export default function CryptoChart() {
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [timeframe, setTimeframe] = useState<string>('1Y');
   const [isLive, setIsLive] = useState<boolean>(true);
+  const [showAgents, setShowAgents] = useState<boolean>(true);
 
-
+  // Traditional rug pull states
   const [rugPullTriggered, setRugPullTriggered] = useState<boolean>(false);
   const [rugPullInProgress, setRugPullInProgress] = useState<boolean>(false);
   const [rugPullComplete, setRugPullComplete] = useState<boolean>(false);
   const [rugPullStage, setRugPullStage] = useState<number>(0);
 
+  // Trading agents system
+  const {
+    agents,
+    trades,
+    isRugPullScheduled,
+    rugPullCountdown,
+    generateMarketUpdate,
+    scheduleRandomRugPull,
+    triggerRugPull: triggerAgentRugPull,
+    resetAfterRugPull
+  } = useTradingAgents(25); // Initial price
 
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const randomRugPullTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Toggle agent active status
+  const toggleAgent = (agentId: string) => {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
 
+    // Update agent active status
+    const updatedAgents = agents.map(a =>
+      a.id === agentId ? { ...a, active: !a.active } : a
+    );
+
+    // This will be handled by the useTradingAgents hook internally
+  };
+
+  // Trigger manual rug pull
   const triggerRugPull = () => {
     if (rugPullTriggered || rugPullInProgress || rugPullComplete) return;
 
@@ -183,6 +212,8 @@ export default function CryptoChart() {
     setRugPullTriggered(true);
     setRugPullStage(0);
 
+    // Trigger rug pull in the agent system
+    triggerAgentRugPull();
 
     console.log('Market state before cash out:', {
       currentPrice,
@@ -203,10 +234,14 @@ export default function CryptoChart() {
     setData(rugPullData);
     setCurrentPrice(rugPullData[rugPullData.length - 1].close);
 
+    // The random cashouts are now handled internally by the useTradingAgents hook
+    // No need to manually schedule them here
 
     return () => {
       if (animationIntervalRef.current)
         clearInterval(animationIntervalRef.current);
+      if (randomRugPullTimeoutRef.current)
+        clearTimeout(randomRugPullTimeoutRef.current);
     };
   }, []);
 
@@ -220,6 +255,7 @@ export default function CryptoChart() {
       return;
     }
 
+    // Update every 2 seconds for natural trading flow
     animationIntervalRef.current = setInterval(() => {
       setData((prevData) => {
         if (prevData.length === 0) return prevData;
@@ -228,7 +264,7 @@ export default function CryptoChart() {
         const newDate = new Date(lastPoint.date);
         newDate.setDate(newDate.getDate() + 1);
 
-
+        // Skip weekends
         if (newDate.getDay() === 0) newDate.setDate(newDate.getDate() + 1);
         if (newDate.getDay() === 6) newDate.setDate(newDate.getDate() + 2);
 
@@ -236,13 +272,17 @@ export default function CryptoChart() {
         let volatility = 0;
         let newVolume = 0;
 
+        // Generate market update from trading agents
+        const marketUpdate = generateMarketUpdate(lastPoint.close);
+        priceChange = marketUpdate.priceChange;
+        volatility = marketUpdate.volatility;
+        newVolume = marketUpdate.newVolume;
 
+        // If traditional rug pull is triggered, override with rug pull behavior
         if (rugPullTriggered && !rugPullComplete) {
           setRugPullInProgress(true);
 
-
           switch (rugPullStage) {
-
             case 0:
               priceChange = 3 + Math.random() * 2;
               volatility = 2;
@@ -253,7 +293,6 @@ export default function CryptoChart() {
               });
               setRugPullStage(1);
               break;
-
 
             case 1:
               priceChange = 4 + Math.random() * 3;
@@ -266,7 +305,6 @@ export default function CryptoChart() {
               setRugPullStage(2);
               break;
 
-
             case 2:
               priceChange = 1 + Math.random() * 2;
               volatility = 5;
@@ -277,7 +315,6 @@ export default function CryptoChart() {
               });
               setRugPullStage(3);
               break;
-
 
             case 3:
               priceChange = -5 - Math.random() * 3;
@@ -290,7 +327,6 @@ export default function CryptoChart() {
               setRugPullStage(4);
               break;
 
-
             case 4:
               priceChange = -20 - Math.random() * 15;
               volatility = 15;
@@ -301,7 +337,6 @@ export default function CryptoChart() {
               });
               setRugPullStage(5);
               break;
-
 
             case 5:
               priceChange = -10 - Math.random() * 5;
@@ -314,7 +349,6 @@ export default function CryptoChart() {
               setRugPullStage(6);
               break;
 
-
             case 6:
               priceChange = (Math.random() - 0.6) * 3;
               volatility = 4;
@@ -324,7 +358,7 @@ export default function CryptoChart() {
                 newPrice: lastPoint.close + priceChange,
               });
               setRugPullComplete(true);
-
+              resetAfterRugPull();
 
               console.log('🔥 CASH OUT COMPLETE 🔥');
               console.log('Market state after cash out:', {
@@ -341,19 +375,11 @@ export default function CryptoChart() {
               break;
 
             default:
-
               priceChange = (Math.random() - 0.5) * 2;
               volatility = 2;
               newVolume = 50 + Math.random() * 50;
           }
-        } else {
-
-          const trend = Math.random() > 0.5 ? 1 : -1;
-          volatility = 1 + Math.random() * 2;
-          priceChange = trend * Math.random() * volatility;
-          newVolume = Math.random() * 100;
         }
-
 
         const newClose = Math.max(1, lastPoint.close + priceChange);
         const newOpen = lastPoint.close;
@@ -367,16 +393,14 @@ export default function CryptoChart() {
           high: newHigh,
           low: Math.max(0.5, newLow),
           close: newClose,
-          volume: newVolume,
+          volume: newVolume || Math.random() * 100, // Ensure we have some volume
         };
-
 
         setCurrentPrice(newClose);
 
-
         return [...prevData.slice(1), newPoint];
       });
-    }, 1000);
+    }, 10000); // Update every 10 seconds as requested
 
     return () => {
       if (animationIntervalRef.current) {
@@ -690,23 +714,16 @@ export default function CryptoChart() {
           >
             Price
           </Button>
-
+          <Button
+            variant="outline"
+            className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441] ml-2"
+            onClick={() => setShowAgents(!showAgents)}
+          >
+            {showAgents ? 'Hide Agents' : 'Show Agents'}
+          </Button>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            className={`${rugPullTriggered
-              ? 'bg-red-900 text-red-100 border-red-700'
-              : 'bg-[#1e2530] border-0 text-white hover:bg-red-900 hover:text-red-100'
-              } fixed bottom-12 right-12`}
-            onClick={triggerRugPull}
-            disabled={rugPullTriggered || !isLive}
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            {rugPullTriggered ? 'Cash out Triggered' : 'Trigger Cash out'}
-          </Button>
-
 
           <Tabs
             defaultValue="1Y"
@@ -774,31 +791,45 @@ export default function CryptoChart() {
         <div className="h-[700px] w-full relative">
           <canvas id="chart" className="w-full h-full"></canvas>
 
+          {/* Trading agents panel */}
+          {showAgents && (
+            <TradingAgentsPanel
+              agents={agents}
+              trades={trades}
+              isRugPullScheduled={isRugPullScheduled || rugPullInProgress}
+              rugPullCountdown={rugPullCountdown}
+              onToggleAgent={toggleAgent}
+              onTriggerRugPull={triggerRugPull}
+            />
+          )}
 
-          {rugPullInProgress && !rugPullComplete && (
+          {/* Trade notifications */}
+          <TradeNotifications trades={trades} maxNotifications={5} />
+
+          {(rugPullInProgress || isRugPullScheduled) && !rugPullComplete && (
             <div className="absolute inset-0 pointer-events-none">
               <div
-                className={`absolute top-4 left-4 bg-black/70 bg-opacity-70 p-3 rounded-lg border ${rugPullStage >= 3
+                className={`absolute bottom-4 right-4 bg-black/70 bg-opacity-70 p-3 rounded-lg border ${(rugPullStage >= 3 || (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10))
                   ? 'border-red-400 animate-pulse'
                   : 'border-orange-400'
                   }`}
               >
                 <div className="flex items-center">
                   <AlertTriangle
-                    className={`h-5 w-5 mr-2 ${rugPullStage >= 3 ? 'text-red-400' : 'text-orange-400'
+                    className={`h-5 w-5 mr-2 ${(rugPullStage >= 3 || (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10)) ? 'text-red-400' : 'text-orange-400'
                       }`}
                   />
                   <span
-                    className={`font-bold ${rugPullStage >= 3 ? 'text-red-400' : 'text-orange-400'
+                    className={`font-bold ${(rugPullStage >= 3 || (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10)) ? 'text-red-400' : 'text-orange-400'
                       }`}
                   >
-                    {rugPullStage >= 3
+                    {(rugPullStage >= 3 || (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10))
                       ? 'MAJOR SELL-OFF IN PROGRESS'
                       : 'UNUSUAL ACTIVITY DETECTED'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-300 mt-1">
-                  {rugPullStage >= 3
+                  {(rugPullStage >= 3 || (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10))
                     ? 'Extreme volatility detected. High risk of further price drops.'
                     : 'Monitoring unusual price movement and volume.'}
                 </div>
@@ -808,7 +839,7 @@ export default function CryptoChart() {
 
           {rugPullComplete && (
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-4 left-4 bg-black/70 bg-opacity-70 p-3 rounded-xl border border-red-400">
+              <div className="absolute bottom-4 right-4 bg-black/70 bg-opacity-70 p-3 rounded-xl border border-red-400">
                 <div className="flex items-center ">
                   <AlertTriangle className="h-5 w-5 mr-2 text-red-400" />
                   <span className="font-bold text-red-400">
