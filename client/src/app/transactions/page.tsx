@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Connect } from "../../components/wallet/Connect";
-import TransactionList from "../../components/wallet/TransactionList";
-import BlurText from "../../components/animated/BlurText";
-import { FaHistory } from "react-icons/fa";
-import Link from "next/link";
+import { useState } from 'react';
+import { Connect } from '../../components/wallet/Connect';
+import TransactionList from '../../components/wallet/TransactionList';
+import BlurText from '../../components/animated/BlurText';
+import { FaHistory } from 'react-icons/fa';
+import Link from 'next/link';
 
 export default function TransactionsPage() {
   return (

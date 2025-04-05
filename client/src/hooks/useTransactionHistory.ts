@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { usePublicClient, useBlockNumber, useAccount } from "wagmi";
-import { formatEther } from "viem";
-import { useWalletContext } from "../context/WalletContext";
+import { useState, useEffect } from 'react';
+import { usePublicClient, useBlockNumber, useAccount } from 'wagmi';
+import { formatEther } from 'viem';
+import { useWalletContext } from '../context/WalletContext';
 
 export interface Transaction {
   hash: string;
@@ -53,15 +53,15 @@ export function useTransactionHistory() {
 
             if (
               !block.transactions ||
-              typeof block.transactions[0] === "string"
+              typeof block.transactions[0] === 'string'
             ) {
               continue;
             }
 
             for (const tx of block.transactions) {
-              if (typeof tx === "string") continue;
+              if (typeof tx === 'string') continue;
 
-              const toAddressLower = tx.to?.toLowerCase() || "";
+              const toAddressLower = tx.to?.toLowerCase() || '';
               const fromAddressLower = tx.from.toLowerCase();
               const userAddressLower = walletAddress.toLowerCase();
 
@@ -92,12 +92,12 @@ export function useTransactionHistory() {
         processedTxs.sort((a, b) => b.timestamp - a.timestamp);
         setTransactions(processedTxs);
       } catch (err) {
-        console.error("Error fetching transaction history:", err);
+        console.error('Error fetching transaction history:', err);
         if (isMounted) {
           setError(
             err instanceof Error
               ? err
-              : new Error("Failed to fetch transactions"),
+              : new Error('Failed to fetch transactions'),
           );
         }
       } finally {
@@ -123,26 +123,26 @@ export function useTransactionHistory() {
     const now = Math.floor(Date.now() / 1000);
     const dummyTxs: Transaction[] = [
       {
-        hash: "0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        from: "0x1234567890123456789012345678901234567890",
+        hash: '0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        from: '0x1234567890123456789012345678901234567890',
         to: walletAddress as string,
-        value: "0.1",
+        value: '0.1',
         timestamp: now - 300,
         isIncoming: true,
       },
       {
-        hash: "0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456",
+        hash: '0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456',
         from: walletAddress as string,
-        to: "0x2345678901234567890123456789012345678901",
-        value: "0.05",
+        to: '0x2345678901234567890123456789012345678901',
+        value: '0.05',
         timestamp: now - 3600,
         isIncoming: false,
       },
       {
-        hash: "0x789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234",
-        from: "0x3456789012345678901234567890123456789012",
+        hash: '0x789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234',
+        from: '0x3456789012345678901234567890123456789012',
         to: walletAddress as string,
-        value: "0.2",
+        value: '0.2',
         timestamp: now - 7200,
         isIncoming: true,
       },

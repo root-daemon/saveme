@@ -1,15 +1,15 @@
-"use client";
-import React, { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaArrowRight, FaPlus, FaCoins } from "react-icons/fa";
-import { SiEthereum } from "react-icons/si";
-import { Connect } from "../../components/wallet/Connect";
-import { useWalletContext } from "../../context/WalletContext";
+'use client';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaArrowRight, FaPlus, FaCoins } from 'react-icons/fa';
+import { SiEthereum } from 'react-icons/si';
+import { Connect } from '../../components/wallet/Connect';
+import { useWalletContext } from '../../context/WalletContext';
 
 export default function CreateTokenPage() {
   const [step, setStep] = useState(1);
-  const [tokenName, setTokenName] = useState("");
-  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [tokenName, setTokenName] = useState('');
+  const [tokenSymbol, setTokenSymbol] = useState('');
   const [tokenImage, setTokenImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address } = useWalletContext();
@@ -60,7 +60,7 @@ export default function CreateTokenPage() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
+        ease: 'easeOut',
       },
     },
     exit: {
@@ -68,7 +68,7 @@ export default function CreateTokenPage() {
       y: -20,
       transition: {
         duration: 0.3,
-        ease: "easeIn",
+        ease: 'easeIn',
       },
     },
   };
@@ -87,19 +87,19 @@ export default function CreateTokenPage() {
   }) => {
     return (
       <motion.button
-        initial={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+        initial={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
         whileHover={{
-          backgroundColor: "var(--foreground)",
-          color: "var(--background)",
+          backgroundColor: 'var(--foreground)',
+          color: 'var(--background)',
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
         disabled={disabled}
         onClick={onClick}
         className={`${
-          fullWidth ? "w-full" : "flex-1"
+          fullWidth ? 'w-full' : 'flex-1'
         } flex items-center justify-center gap-2 bg-foreground/10 cursor-pointer text-foreground py-3 rounded-full font-medium transition-all ${
-          disabled ? "opacity-50 cursor-not-allowed" : ""
+          disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
         {children}
@@ -112,7 +112,7 @@ export default function CreateTokenPage() {
       <motion.div
         initial={{ x: 0 }}
         whileHover={{ x: 4 }}
-        transition={{ type: "spring", stiffness: 400 }}
+        transition={{ type: 'spring', stiffness: 400 }}
       >
         <FaArrowRight />
       </motion.div>
@@ -152,7 +152,7 @@ export default function CreateTokenPage() {
               <motion.div
                 key={i}
                 className={`h-2 w-8 rounded-full ${
-                  i === step ? "bg-foreground" : "bg-white/10"
+                  i === step ? 'bg-foreground' : 'bg-white/10'
                 }`}
                 animate={{
                   scale: i === step ? [1, 1.05, 1] : 1,
@@ -160,7 +160,7 @@ export default function CreateTokenPage() {
                 transition={{
                   duration: 0.5,
                   repeat: i === step ? Infinity : 0,
-                  repeatType: "reverse",
+                  repeatType: 'reverse',
                 }}
               />
             ))}
@@ -234,7 +234,7 @@ export default function CreateTokenPage() {
                 <div className="flex gap-3">
                   <motion.button
                     whileHover={{
-                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handlePreviousStep}
@@ -324,7 +324,7 @@ export default function CreateTokenPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-foreground/70">Image</span>
                       <span className="text-white font-medium">
-                        {tokenImage ? "✓ Uploaded" : "Not uploaded (optional)"}
+                        {tokenImage ? '✓ Uploaded' : 'Not uploaded (optional)'}
                       </span>
                     </div>
                   </div>
@@ -333,7 +333,7 @@ export default function CreateTokenPage() {
                 <div className="flex gap-3">
                   <motion.button
                     whileHover={{
-                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handlePreviousStep}

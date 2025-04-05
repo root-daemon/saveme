@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 interface CryptoPrice {
   id: number;
@@ -15,10 +15,10 @@ export const useCryptoPrice = () => {
 
   const fetchPrices = async () => {
     try {
-      const response = await fetch("/api/crypto");
+      const response = await fetch('/api/crypto');
 
       if (!response.ok) {
-        throw new Error("Failed to fetch prices");
+        throw new Error('Failed to fetch prices');
       }
 
       const data = await response.json();
@@ -33,8 +33,8 @@ export const useCryptoPrice = () => {
       setPrices(formattedPrices);
       setLoading(false);
     } catch (err) {
-      console.error("API Error:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch prices");
+      console.error('API Error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch prices');
       setLoading(false);
     }
   };

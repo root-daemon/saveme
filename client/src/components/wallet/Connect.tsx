@@ -1,6 +1,6 @@
-"use client";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useWalletContext } from "../../context/WalletContext";
+'use client';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useWalletContext } from '../../context/WalletContext';
 
 export const Connect = () => {
   const { isConnected } = useWalletContext();
@@ -16,20 +16,20 @@ export const Connect = () => {
         authenticationStatus,
         mounted,
       }) => {
-        const ready = mounted && authenticationStatus !== "loading";
+        const ready = mounted && authenticationStatus !== 'loading';
         const connected =
           ready &&
           account &&
           chain &&
-          (!authenticationStatus || authenticationStatus === "authenticated");
+          (!authenticationStatus || authenticationStatus === 'authenticated');
         return (
           <div
             {...(!ready && {
-              "aria-hidden": true,
+              'aria-hidden': true,
               style: {
                 opacity: 0,
-                pointerEvents: "none",
-                userSelect: "none",
+                pointerEvents: 'none',
+                userSelect: 'none',
               },
             })}
             className="font-sans font-medium mt-10"
@@ -61,7 +61,7 @@ export const Connect = () => {
                 <div className="flex gap-3 bg-[rgba(5,16,8,0.7)] p-1 rounded-xl ">
                   <button onClick={openChainModal} type="button">
                     <img
-                      alt={chain.name ?? "Chain icon"}
+                      alt={chain.name ?? 'Chain icon'}
                       src={chain.iconUrl}
                       className="w-5 h-5"
                     />

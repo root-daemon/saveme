@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { createContext, useContext, ReactNode } from "react";
-import { useAccount } from "wagmi";
+import { createContext, useContext, ReactNode } from 'react';
+import { useAccount } from 'wagmi';
 
 type WalletContextType = ReturnType<typeof useAccount>;
 
@@ -20,7 +20,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 export function useWalletContext() {
   const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error("useWalletContext must be used within a WalletProvider");
+    throw new Error('useWalletContext must be used within a WalletProvider');
   }
   return context;
 }

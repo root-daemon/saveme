@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import {
   useAccount,
   useReadContract,
   useWatchContractEvent,
   useWriteContract,
-} from "wagmi";
-import { WalletABI, WALLET_CONTRACT_ADDRESS } from "../lib/contract";
-import { parseEther, formatEther } from "viem";
+} from 'wagmi';
+import { WalletABI, WALLET_CONTRACT_ADDRESS } from '../lib/contract';
+import { parseEther, formatEther } from 'viem';
 
 type Address = `0x${string}`;
 
@@ -29,7 +29,7 @@ export function useWallet() {
   } = useReadContract({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
-    functionName: "getUserTokens",
+    functionName: 'getUserTokens',
     account: address,
   });
 
@@ -47,7 +47,7 @@ export function useWallet() {
       writeAddToken({
         address: WALLET_CONTRACT_ADDRESS,
         abi: WalletABI,
-        functionName: "addToken",
+        functionName: 'addToken',
         args: [token, parseEther(amount)],
       });
     },
@@ -68,7 +68,7 @@ export function useWallet() {
       writeRemoveToken({
         address: WALLET_CONTRACT_ADDRESS,
         abi: WalletABI,
-        functionName: "removeToken",
+        functionName: 'removeToken',
         args: [token, parseEther(amount)],
       });
     },
@@ -86,7 +86,7 @@ export function useWallet() {
 
     const balances = userTokens.map((token) => ({
       token,
-      balance: "0.01",
+      balance: '0.01',
     }));
 
     setTokenBalances(balances);
@@ -112,7 +112,7 @@ export function useWallet() {
   useWatchContractEvent({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
-    eventName: "TokenAdded",
+    eventName: 'TokenAdded',
     onLogs() {
       refetchTokens();
     },
@@ -121,7 +121,7 @@ export function useWallet() {
   useWatchContractEvent({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
-    eventName: "TokenRemoved",
+    eventName: 'TokenRemoved',
     onLogs() {
       refetchTokens();
     },

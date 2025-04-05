@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   FaChevronRight,
   FaExchangeAlt,
   FaExternalLinkAlt,
   FaBug,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 import {
   useTransactionHistory,
   Transaction,
-} from "../../hooks/useTransactionHistory";
-import { useWalletContext } from "../../context/WalletContext";
-import { usePublicClient, useBlockNumber } from "wagmi";
+} from '../../hooks/useTransactionHistory';
+import { useWalletContext } from '../../context/WalletContext';
+import { usePublicClient, useBlockNumber } from 'wagmi';
 
 interface TransactionListProps {
   limit?: number;
@@ -21,23 +21,23 @@ interface TransactionListProps {
 }
 
 const shortenAddress = (address: string) => {
-  if (!address) return "";
+  if (!address) return '';
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
 const formatDate = (timestamp: number) => {
   return new Date(timestamp * 1000).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };
 
 const formatValue = (value: string) => {
   const numValue = parseFloat(value);
-  if (isNaN(numValue) || numValue === 0) return "0 ETH";
+  if (isNaN(numValue) || numValue === 0) return '0 ETH';
 
   return `${numValue.toFixed(numValue < 0.001 ? 6 : 4)} ETH`;
 };
@@ -73,23 +73,23 @@ export default function TransactionList({
         <div className="grid grid-cols-1 gap-4 text-white text-sm mb-4">
           <div>
             <p className="text-foreground">Connected Address:</p>
-            <p className="font-mono">{address || "Not connected"}</p>
+            <p className="font-mono">{address || 'Not connected'}</p>
           </div>
           <div>
             <p className="text-foreground">Current Block Number:</p>
-            <p>{blockNumber ? blockNumber.toString() : "Unknown"}</p>
+            <p>{blockNumber ? blockNumber.toString() : 'Unknown'}</p>
           </div>
           <div>
             <p className="text-foreground">Public Client Available:</p>
-            <p>{publicClient ? "Yes" : "No"}</p>
+            <p>{publicClient ? 'Yes' : 'No'}</p>
           </div>
           <div>
             <p className="text-foreground">Loading State:</p>
-            <p>{isLoading ? "Loading..." : "Completed"}</p>
+            <p>{isLoading ? 'Loading...' : 'Completed'}</p>
           </div>
           <div>
             <p className="text-foreground">Error:</p>
-            <p className="text-red-400">{error ? error.message : "None"}</p>
+            <p className="text-red-400">{error ? error.message : 'None'}</p>
           </div>
           <div>
             <p className="text-foreground">Transactions Count:</p>
@@ -210,7 +210,7 @@ export default function TransactionList({
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-white">
-                    {tx.isIncoming ? "Received" : "Sent"}
+                    {tx.isIncoming ? 'Received' : 'Sent'}
                   </h3>
                   <p className="text-foreground text-sm">
                     {formatDate(tx.timestamp)}
@@ -222,8 +222,8 @@ export default function TransactionList({
                   {formatValue(tx.value)}
                 </p>
                 <p className="text-foreground text-sm">
-                  {tx.isIncoming ? "From: " : "To: "}
-                  {shortenAddress(tx.isIncoming ? tx.from : tx.to || "")}
+                  {tx.isIncoming ? 'From: ' : 'To: '}
+                  {shortenAddress(tx.isIncoming ? tx.from : tx.to || '')}
                 </p>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function TransactionList({
                   <div>
                     <p className="text-foreground text-sm">To:</p>
                     <p className="text-white font-mono text-sm break-all">
-                      {tx.to || "Contract Creation"}
+                      {tx.to || 'Contract Creation'}
                     </p>
                   </div>
                   <div>

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useRef } from "react";
+import { useState, useRef } from 'react';
 import {
   FaEthereum,
   FaBitcoin,
@@ -10,15 +10,15 @@ import {
   FaExchangeAlt,
   FaPlus,
   FaMinus,
-} from "react-icons/fa";
-import { SiChainlink, SiPolkadot } from "react-icons/si";
-import { Connect } from "../../components/wallet/Connect";
-import BlurText from "../../components/animated/BlurText";
-import CircularText from "../../components/animated/Circular";
-import RotatingText from "../../components/animated/Rotate";
-import { useCryptoPrice } from "../../hooks/useCryptoPrice";
-import { EXAMPLE_TOKENS } from "../../lib/contract";
-import { useAccount } from "wagmi";
+} from 'react-icons/fa';
+import { SiChainlink, SiPolkadot } from 'react-icons/si';
+import { Connect } from '../../components/wallet/Connect';
+import BlurText from '../../components/animated/BlurText';
+import CircularText from '../../components/animated/Circular';
+import RotatingText from '../../components/animated/Rotate';
+import { useCryptoPrice } from '../../hooks/useCryptoPrice';
+import { EXAMPLE_TOKENS } from '../../lib/contract';
+import { useAccount } from 'wagmi';
 import {
   useWalletFunctions,
   useGetUserTokens,
@@ -27,11 +27,11 @@ import {
   useRemoveToken,
   useNativeBalance,
   formatBalance,
-} from "../../hooks/useContractFunctions";
-import { useWalletContext } from "../../context/WalletContext";
-import { useTransactionHistory } from "../../hooks/useTransactionHistory";
-import TransactionList from "../../components/wallet/TransactionList";
-import Link from "next/link";
+} from '../../hooks/useContractFunctions';
+import { useWalletContext } from '../../context/WalletContext';
+import { useTransactionHistory } from '../../hooks/useTransactionHistory';
+import TransactionList from '../../components/wallet/TransactionList';
+import Link from 'next/link';
 
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const { balance, isLoading, isError } = useGetTokenBalance(tokenAddress);
@@ -82,8 +82,8 @@ const TokenDisplay = ({
 };
 
 const AddTokenForm = () => {
-  const [tokenAddress, setTokenAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [tokenAddress, setTokenAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const { addToken, isPending, isSuccess, isError } = useAddToken();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,8 +91,8 @@ const AddTokenForm = () => {
     if (tokenAddress && amount) {
       addToken(tokenAddress as `0x${string}`, amount);
       if (isSuccess) {
-        setTokenAddress("");
-        setAmount("");
+        setTokenAddress('');
+        setAmount('');
       }
     }
   };
@@ -124,11 +124,11 @@ const AddTokenForm = () => {
         disabled={isPending || !tokenAddress || !amount}
         className={`w-full bg-foreground text-background rounded-lg p-3 hover:opacity-90 transition-colors ${
           isPending || !tokenAddress || !amount
-            ? "opacity-50 cursor-not-allowed"
-            : ""
+            ? 'opacity-50 cursor-not-allowed'
+            : ''
         }`}
       >
-        {isPending ? "Processing..." : "Add Token"}
+        {isPending ? 'Processing...' : 'Add Token'}
       </button>
       {isSuccess && <p className="text-green-400">Token added successfully!</p>}
       {isError && <p className="text-red-400">Error adding token</p>}
@@ -137,7 +137,7 @@ const AddTokenForm = () => {
 };
 
 const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState('');
   const { removeToken, isPending, isSuccess, isError } = useRemoveToken();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -145,7 +145,7 @@ const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
     if (amount) {
       removeToken(tokenAddress, amount);
       if (isSuccess) {
-        setAmount("");
+        setAmount('');
       }
     }
   };
@@ -166,10 +166,10 @@ const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
         type="submit"
         disabled={isPending || !amount}
         className={`w-full bg-red-500 text-white rounded-lg p-3 hover:opacity-90 transition-colors ${
-          isPending || !amount ? "opacity-50 cursor-not-allowed" : ""
+          isPending || !amount ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        {isPending ? "Processing..." : "Remove Token"}
+        {isPending ? 'Processing...' : 'Remove Token'}
       </button>
       {isSuccess && (
         <p className="text-green-400">Token removed successfully!</p>
@@ -203,19 +203,19 @@ export default function WalletDashboard() {
     error: txError,
   } = useTransactionHistory();
 
-  const [tokenAddress, setTokenAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [tokenAddress, setTokenAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
-  const [selectedToken, setSelectedToken] = useState("");
-  const [removeAmount, setRemoveAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState('');
+  const [removeAmount, setRemoveAmount] = useState('');
 
   const modalRef = useRef<HTMLDivElement>(null);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(price);
@@ -225,7 +225,7 @@ export default function WalletDashboard() {
     const crypto = prices?.find(
       (p) => p.symbol.toLowerCase() === symbol.toLowerCase(),
     );
-    return crypto ? formatPrice(crypto.price) : "Loading...";
+    return crypto ? formatPrice(crypto.price) : 'Loading...';
   };
 
   const getTokenPriceValue = (symbol: string): number => {
@@ -239,14 +239,14 @@ export default function WalletDashboard() {
     const token = tokenBalances.find(
       (t) => t.token.toLowerCase() === address.toLowerCase(),
     );
-    return token ? token.balance : "0";
+    return token ? token.balance : '0';
   };
 
   const handleAddToken = () => {
     if (tokenAddress && amount && !isAddPending) {
       addToken(tokenAddress as `0x${string}`, amount);
-      setTokenAddress("");
-      setAmount("");
+      setTokenAddress('');
+      setAmount('');
       setIsAddModalOpen(false);
     }
   };
@@ -254,8 +254,8 @@ export default function WalletDashboard() {
   const handleRemoveToken = () => {
     if (selectedToken && removeAmount && !isRemovePending) {
       removeToken(selectedToken as `0x${string}`, removeAmount);
-      setSelectedToken("");
-      setRemoveAmount("");
+      setSelectedToken('');
+      setRemoveAmount('');
       setIsRemoveModalOpen(false);
     }
   };
@@ -313,17 +313,17 @@ export default function WalletDashboard() {
       <section className="mb-24">
         <div className="flex justify-between items-center mb-5">
           <h3 className="text-3xl font-semibold text-white">
-            Your{" "}
+            Your{' '}
             <RotatingText
-              texts={["Balance", "Assets", "Portfolio"]}
+              texts={['Balance', 'Assets', 'Portfolio']}
               mainClassName="px-2 sm:px-2 md:px-3 bg-foreground inline-flex text-black overflow-hidden py-1 justify-center rounded-lg"
-              staggerFrom={"last"}
-              initial={{ y: "100%" }}
+              staggerFrom={'last'}
+              initial={{ y: '100%' }}
               animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
+              exit={{ y: '-120%' }}
               staggerDuration={0.025}
               splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
               rotationInterval={2000}
             />
           </h3>
@@ -358,7 +358,7 @@ export default function WalletDashboard() {
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-white">Ethereum</h3>
-                  <p className="text-foreground">{getCryptoPrice("ETH")}</p>
+                  <p className="text-foreground">{getCryptoPrice('ETH')}</p>
                 </div>
               </div>
               <div className="flex justify-between mt-4">
@@ -366,7 +366,7 @@ export default function WalletDashboard() {
                 <TokenDisplay
                   token={EXAMPLE_TOKENS.ETH}
                   symbol="ETH"
-                  price={getTokenPriceValue("ETH")}
+                  price={getTokenPriceValue('ETH')}
                 />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.ETH)}
@@ -384,7 +384,7 @@ export default function WalletDashboard() {
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-white">Bitcoin</h3>
-                  <p className="text-foreground">{getCryptoPrice("BTC")}</p>
+                  <p className="text-foreground">{getCryptoPrice('BTC')}</p>
                 </div>
               </div>
               <div className="flex justify-between mt-4">
@@ -392,7 +392,7 @@ export default function WalletDashboard() {
                 <TokenDisplay
                   token={EXAMPLE_TOKENS.BTC}
                   symbol="BTC"
-                  price={getTokenPriceValue("BTC")}
+                  price={getTokenPriceValue('BTC')}
                 />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.BTC)}
@@ -410,7 +410,7 @@ export default function WalletDashboard() {
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-white">Chainlink</h3>
-                  <p className="text-foreground">{getCryptoPrice("LINK")}</p>
+                  <p className="text-foreground">{getCryptoPrice('LINK')}</p>
                 </div>
               </div>
               <div className="flex justify-between mt-4">
@@ -418,7 +418,7 @@ export default function WalletDashboard() {
                 <TokenDisplay
                   token={EXAMPLE_TOKENS.LINK}
                   symbol="LINK"
-                  price={getTokenPriceValue("LINK")}
+                  price={getTokenPriceValue('LINK')}
                 />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.LINK)}
@@ -436,7 +436,7 @@ export default function WalletDashboard() {
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-white">Polkadot</h3>
-                  <p className="text-foreground">{getCryptoPrice("DOT")}</p>
+                  <p className="text-foreground">{getCryptoPrice('DOT')}</p>
                 </div>
               </div>
               <div className="flex justify-between mt-4">
@@ -444,7 +444,7 @@ export default function WalletDashboard() {
                 <TokenDisplay
                   token={EXAMPLE_TOKENS.DOT}
                   symbol="DOT"
-                  price={getTokenPriceValue("DOT")}
+                  price={getTokenPriceValue('DOT')}
                 />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.DOT)}
@@ -481,7 +481,7 @@ export default function WalletDashboard() {
         <TransactionList
           limit={3}
           showViewAll={true}
-          onViewAll={() => (window.location.href = "/transactions")}
+          onViewAll={() => (window.location.href = '/transactions')}
         />
       </section>
 
@@ -613,11 +613,11 @@ function UserTokensList() {
   }
 
   const getTokenSymbol = (address: string): string => {
-    if (address === EXAMPLE_TOKENS.ETH) return "ETH";
-    if (address === EXAMPLE_TOKENS.BTC) return "BTC";
-    if (address === EXAMPLE_TOKENS.LINK) return "LINK";
-    if (address === EXAMPLE_TOKENS.DOT) return "DOT";
-    return "TOKEN";
+    if (address === EXAMPLE_TOKENS.ETH) return 'ETH';
+    if (address === EXAMPLE_TOKENS.BTC) return 'BTC';
+    if (address === EXAMPLE_TOKENS.LINK) return 'LINK';
+    if (address === EXAMPLE_TOKENS.DOT) return 'DOT';
+    return 'TOKEN';
   };
 
   const getTokenPrice = (symbol: string): number => {
@@ -636,16 +636,16 @@ function UserTokensList() {
           return (
             <li key={index} className="py-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                {symbol === "ETH" && (
+                {symbol === 'ETH' && (
                   <FaEthereum className="text-white text-xl" />
                 )}
-                {symbol === "BTC" && (
+                {symbol === 'BTC' && (
                   <FaBitcoin className="text-white text-xl" />
                 )}
-                {symbol === "LINK" && (
+                {symbol === 'LINK' && (
                   <SiChainlink className="text-white text-xl" />
                 )}
-                {symbol === "DOT" && (
+                {symbol === 'DOT' && (
                   <SiPolkadot className="text-white text-xl" />
                 )}
                 <div>

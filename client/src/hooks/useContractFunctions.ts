@@ -3,11 +3,11 @@ import {
   useWriteContract,
   useSendTransaction as useWagmiSendTransaction,
   useBalance,
-} from "wagmi";
-import { WalletABI, WALLET_CONTRACT_ADDRESS } from "../lib/contract";
-import { parseEther, formatEther } from "viem";
-import { useState, useEffect } from "react";
-import { useWalletContext } from "../context/WalletContext";
+} from 'wagmi';
+import { WalletABI, WALLET_CONTRACT_ADDRESS } from '../lib/contract';
+import { parseEther, formatEther } from 'viem';
+import { useState, useEffect } from 'react';
+import { useWalletContext } from '../context/WalletContext';
 
 type Address = `0x${string}`;
 
@@ -15,14 +15,14 @@ export const formatBalance = (
   balance: string | undefined,
   decimals = 4,
 ): string => {
-  if (!balance) return "0";
+  if (!balance) return '0';
 
   const num = parseFloat(balance);
-  if (num === 0) return "0";
+  if (num === 0) return '0';
 
   const formattedBalance = num.toFixed(decimals);
 
-  return formattedBalance.replace(/\.?0+$/, "");
+  return formattedBalance.replace(/\.?0+$/, '');
 };
 
 export function useNativeBalance() {
@@ -39,8 +39,8 @@ export function useNativeBalance() {
   });
 
   return {
-    balance: balanceData?.formatted || "0",
-    symbol: balanceData?.symbol || "ETH",
+    balance: balanceData?.formatted || '0',
+    symbol: balanceData?.symbol || 'ETH',
     isLoading,
     isError,
     error,
@@ -60,7 +60,7 @@ export function useGetUserTokens() {
   } = useReadContract({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
-    functionName: "getUserTokens",
+    functionName: 'getUserTokens',
     account: address,
     query: {
       enabled: Boolean(isConnected),
@@ -89,7 +89,7 @@ export function useGetTokenBalance(tokenAddress?: Address) {
   } = useReadContract({
     address: WALLET_CONTRACT_ADDRESS,
     abi: WalletABI,
-    functionName: "getTokenBalance",
+    functionName: 'getTokenBalance',
     args: tokenAddress ? [tokenAddress] : undefined,
     account: address,
     query: {
@@ -98,7 +98,7 @@ export function useGetTokenBalance(tokenAddress?: Address) {
   });
 
   return {
-    balance: balance ? formatEther(balance as bigint) : "0",
+    balance: balance ? formatEther(balance as bigint) : '0',
     isLoading,
     isError,
     error,
@@ -132,7 +132,7 @@ export function useAddToken() {
 
   const addToken = async (tokenAddress: Address, amount: string) => {
     if (!isConnected || !address) {
-      console.error("Wallet not connected");
+      console.error('Wallet not connected');
       return;
     }
 
@@ -140,11 +140,11 @@ export function useAddToken() {
       writeContract({
         address: WALLET_CONTRACT_ADDRESS,
         abi: WalletABI,
-        functionName: "addToken",
+        functionName: 'addToken',
         args: [tokenAddress, parseEther(amount)],
       });
     } catch (err) {
-      console.error("Error adding token:", err);
+      console.error('Error adding token:', err);
     }
   };
 
@@ -184,7 +184,7 @@ export function useRemoveToken() {
 
   const removeToken = async (tokenAddress: Address, amount: string) => {
     if (!isConnected || !address) {
-      console.error("Wallet not connected");
+      console.error('Wallet not connected');
       return;
     }
 
@@ -192,11 +192,11 @@ export function useRemoveToken() {
       writeContract({
         address: WALLET_CONTRACT_ADDRESS,
         abi: WalletABI,
-        functionName: "removeToken",
+        functionName: 'removeToken',
         args: [tokenAddress, parseEther(amount)],
       });
     } catch (err) {
-      console.error("Error removing token:", err);
+      console.error('Error removing token:', err);
     }
   };
 
@@ -240,7 +240,7 @@ export function useTransferToken() {
     amount: string,
   ) => {
     if (!isConnected || !address) {
-      console.error("Wallet not connected");
+      console.error('Wallet not connected');
       return;
     }
 
@@ -248,11 +248,11 @@ export function useTransferToken() {
       writeContract({
         address: WALLET_CONTRACT_ADDRESS,
         abi: WalletABI,
-        functionName: "transferToken",
+        functionName: 'transferToken',
         args: [tokenAddress, toAddress, parseEther(amount)],
       });
     } catch (err) {
-      console.error("Error transferring token:", err);
+      console.error('Error transferring token:', err);
     }
   };
 
@@ -278,7 +278,7 @@ export function useGetAllBalances() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const { address, isConnected } = useWalletContext();
-  const ETH_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address;
+  const ETH_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3' as Address;
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -297,7 +297,7 @@ export function useGetAllBalances() {
         balances.push({
           token: ETH_ADDRESS,
           balance: ethBalance,
-          symbol: ethSymbol || "ETH",
+          symbol: ethSymbol || 'ETH',
         });
 
         if (tokens && tokens.length > 0) {
@@ -308,21 +308,21 @@ export function useGetAllBalances() {
           const dummyBalances = otherTokens.map((token) => ({
             token,
             balance:
-              token === "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-                ? "0.05"
-                : token === "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-                  ? "1.25"
-                  : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-                    ? "10.5"
-                    : "0.01",
+              token === '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+                ? '0.05'
+                : token === '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
+                  ? '1.25'
+                  : token === '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
+                    ? '10.5'
+                    : '0.01',
             symbol:
-              token === "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-                ? "BTC"
-                : token === "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-                  ? "LINK"
-                  : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-                    ? "DOT"
-                    : "TOKEN",
+              token === '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+                ? 'BTC'
+                : token === '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
+                  ? 'LINK'
+                  : token === '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
+                    ? 'DOT'
+                    : 'TOKEN',
           }));
 
           balances = [...balances, ...dummyBalances];
@@ -330,7 +330,7 @@ export function useGetAllBalances() {
 
         setTokenBalances(balances);
       } catch (error) {
-        console.error("Error fetching balances:", error);
+        console.error('Error fetching balances:', error);
       } finally {
         setIsLoading(false);
       }
@@ -406,7 +406,7 @@ export function useSendTransaction() {
 
   const sendEth = async (toAddress: Address, amount: string) => {
     if (!isConnected || !address) {
-      console.error("Wallet not connected");
+      console.error('Wallet not connected');
       return;
     }
 
@@ -416,7 +416,7 @@ export function useSendTransaction() {
         value: parseEther(amount),
       });
     } catch (err) {
-      console.error("Error sending ETH:", err);
+      console.error('Error sending ETH:', err);
     }
   };
 

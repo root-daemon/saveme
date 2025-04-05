@@ -1,10 +1,10 @@
-import "@rainbow-me/rainbowkit/styles.css";
-import "../styles/globals.css";
-import { Providers } from "./providers";
+import '@rainbow-me/rainbowkit/styles.css';
+import '../styles/globals.css';
+import { Providers } from './providers';
 
 export const metadata = {
-  title: "SaveMe",
-  description: "Save your funds from rug-pulls",
+  title: 'SaveMe',
+  description: 'Save your funds from rug-pulls',
 };
 
 export default function RootLayout({

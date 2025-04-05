@@ -1,16 +1,16 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { Connect } from "../../components/wallet/Connect";
-import { motion, AnimatePresence } from "framer-motion";
-import { useWalletContext } from "../../context/WalletContext";
-import { useCryptoPrice } from "../../hooks/useCryptoPrice";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Connect } from '../../components/wallet/Connect';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useWalletContext } from '../../context/WalletContext';
+import { useCryptoPrice } from '../../hooks/useCryptoPrice';
 import {
   useTransferToken,
   useGetTokenBalance,
   useSendTransaction,
   useNativeBalance,
   formatBalance,
-} from "../../hooks/useContractFunctions";
+} from '../../hooks/useContractFunctions';
 import {
   SiEthereum,
   SiBitcoin,
@@ -24,96 +24,96 @@ import {
   SiDogecoin,
   SiPolkadot,
   SiCardano,
-} from "react-icons/si";
-import { FaArrowRight } from "react-icons/fa";
+} from 'react-icons/si';
+import { FaArrowRight } from 'react-icons/fa';
 
 // Ethererum special address to represent native ETH
 const ETH_ADDRESS =
-  "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" as `0x${string}`;
+  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as `0x${string}`;
 
 const coins = [
   {
-    name: "Ethereum",
-    symbol: "ETH",
+    name: 'Ethereum',
+    symbol: 'ETH',
     icon: <SiEthereum />,
     address: ETH_ADDRESS,
   },
   {
-    name: "Bitcoin",
-    symbol: "BTC",
+    name: 'Bitcoin',
+    symbol: 'BTC',
     icon: <SiBitcoin />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "USD Coin",
-    symbol: "USDC",
+    name: 'USD Coin',
+    symbol: 'USDC',
     icon: <SiUbiquiti />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Tether",
-    symbol: "USDT",
+    name: 'Tether',
+    symbol: 'USDT',
     icon: <SiTether />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Solana",
-    symbol: "SOL",
+    name: 'Solana',
+    symbol: 'SOL',
     icon: <SiSolana />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Ripple",
-    symbol: "XRP",
+    name: 'Ripple',
+    symbol: 'XRP',
     icon: <SiRipple />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Litecoin",
-    symbol: "LTC",
+    name: 'Litecoin',
+    symbol: 'LTC',
     icon: <SiLitecoin />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Chainlink",
-    symbol: "LINK",
+    name: 'Chainlink',
+    symbol: 'LINK',
     icon: <SiChainlink />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Binance Coin",
-    symbol: "BNB",
+    name: 'Binance Coin',
+    symbol: 'BNB',
     icon: <SiBinance />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Dogecoin",
-    symbol: "DOGE",
+    name: 'Dogecoin',
+    symbol: 'DOGE',
     icon: <SiDogecoin />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Polkadot",
-    symbol: "DOT",
+    name: 'Polkadot',
+    symbol: 'DOT',
     icon: <SiPolkadot />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   {
-    name: "Cardano",
-    symbol: "ADA",
+    name: 'Cardano',
+    symbol: 'ADA',
     icon: <SiCardano />,
-    address: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    address: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
 ];
 
 export default function TransactionPage() {
-  const [toAddress, setToAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [toAddress, setToAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const [coinType, setCoinType] = useState(coins[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isConnected, address } = useWalletContext();
   const { prices, loading: pricesLoading } = useCryptoPrice();
-  const [naturalInput, setNaturalInput] = useState(""); // State for natural language input
+  const [naturalInput, setNaturalInput] = useState(''); // State for natural language input
   const [isProcessing, setIsProcessing] = useState(false); // State for AI processing status
   const [processingError, setProcessingError] = useState<string | null>(null); // State for AI processing errors
 
@@ -156,7 +156,7 @@ export default function TransactionPage() {
       ? isEthBalanceLoading
       : isTokenBalanceLoading;
 
-  const [statusMessage, setStatusMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState('');
 
   // Combined states for UI
   const isPending = isTokenTransferPending || isEthTransferPending;
@@ -167,34 +167,34 @@ export default function TransactionPage() {
   // Handle status messages
   useEffect(() => {
     if (isPending) {
-      setStatusMessage("Transaction pending...");
+      setStatusMessage('Transaction pending...');
     } else if (isSuccess) {
-      setStatusMessage("Transaction successful!");
+      setStatusMessage('Transaction successful!');
       // Clear form
-      setToAddress("");
-      setAmount("");
+      setToAddress('');
+      setAmount('');
     } else if (isError) {
-      setStatusMessage(`Error: ${error?.message || "Transaction failed"}`);
+      setStatusMessage(`Error: ${error?.message || 'Transaction failed'}`);
     } else {
-      setStatusMessage("");
+      setStatusMessage('');
     }
   }, [isPending, isSuccess, isError, error]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isConnected) {
-      setStatusMessage("Please connect your wallet first");
+      setStatusMessage('Please connect your wallet first');
       return;
     }
 
     if (!toAddress || !amount) {
-      setStatusMessage("Please fill in all fields");
+      setStatusMessage('Please fill in all fields');
       return;
     }
 
     // Make sure toAddress is a valid Ethereum address
-    if (!toAddress.startsWith("0x") || toAddress.length !== 42) {
-      setStatusMessage("Please enter a valid Ethereum address");
+    if (!toAddress.startsWith('0x') || toAddress.length !== 42) {
+      setStatusMessage('Please enter a valid Ethereum address');
       return;
     }
 
@@ -210,9 +210,9 @@ export default function TransactionPage() {
         transferToken(coinType.address, toAddressFormatted, amount);
       }
     } catch (err) {
-      console.error("Error submitting transaction:", err);
+      console.error('Error submitting transaction:', err);
       setStatusMessage(
-        `Error: ${(err as Error).message || "Transaction failed"}`,
+        `Error: ${(err as Error).message || 'Transaction failed'}`,
       );
     }
   };
@@ -232,12 +232,12 @@ export default function TransactionPage() {
 
   // Format USD value
   const formatUsdValue = (amount: string, symbol: string): string => {
-    if (!amount) return "$0.00";
+    if (!amount) return '$0.00';
     const coinPrice = getCoinPrice(symbol);
     const usdValue = parseFloat(amount) * coinPrice;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(usdValue);
@@ -245,33 +245,33 @@ export default function TransactionPage() {
 
   // Add the following near the top of the component
   const getAvailableBalance = () => {
-    if (isBalanceLoading) return "Loading...";
+    if (isBalanceLoading) return 'Loading...';
     return `${formatBalance(displayBalance)} ${coinType.symbol}`;
   };
 
   // --- Function to process natural language input ---
   const handleProcessInput = async () => {
     if (!naturalInput) {
-      setProcessingError("Please enter transaction details.");
+      setProcessingError('Please enter transaction details.');
       return;
     }
     setIsProcessing(true);
     setProcessingError(null);
-    setStatusMessage(""); // Clear previous transaction status
+    setStatusMessage(''); // Clear previous transaction status
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch('/api/chat', {
         // Reusing the existing API route for now
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ inputText: naturalInput }), // Sending input text
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to process input");
+        throw new Error(errorData.error || 'Failed to process input');
       }
 
       const data = await response.json();
@@ -297,10 +297,10 @@ export default function TransactionPage() {
         }
       }
       // Clear the natural input field after processing
-      setNaturalInput("");
+      setNaturalInput('');
     } catch (err) {
-      console.error("Error processing natural input:", err);
-      setProcessingError((err as Error).message || "An error occurred");
+      console.error('Error processing natural input:', err);
+      setProcessingError((err as Error).message || 'An error occurred');
     } finally {
       setIsProcessing(false);
     }
@@ -331,9 +331,9 @@ export default function TransactionPage() {
                 const availableBalance = parseFloat(displayBalance);
                 const inputElement = e.target;
                 if (inputAmount > availableBalance) {
-                  inputElement.classList.add("text-red-400");
+                  inputElement.classList.add('text-red-400');
                 } else {
-                  inputElement.classList.remove("text-red-400");
+                  inputElement.classList.remove('text-red-400');
                 }
               }}
               className="bg-transparent py-12 text-center text-6xl font-semibold w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-200"
@@ -372,10 +372,10 @@ export default function TransactionPage() {
           <div
             className={`mb-4 p-2 rounded text-sm ${
               isError
-                ? "bg-red-900/30 text-red-200"
+                ? 'bg-red-900/30 text-red-200'
                 : isSuccess
-                  ? "bg-green-900/30 text-green-200"
-                  : "bg-blue-900/30 text-blue-200"
+                  ? 'bg-green-900/30 text-green-200'
+                  : 'bg-blue-900/30 text-blue-200'
             }`}
           >
             {statusMessage}
@@ -391,15 +391,15 @@ export default function TransactionPage() {
           }
           className={`${
             parseFloat(amount) > parseFloat(displayBalance)
-              ? "bg-red-400/10 text-red-400"
-              : "bg-foreground/10 text-foreground hover:bg-foreground/20"
+              ? 'bg-red-400/10 text-red-400'
+              : 'bg-foreground/10 text-foreground hover:bg-foreground/20'
           } w-full cursor-pointer  py-3 rounded-full font-medium transition disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {!isConnected
-            ? "Connect Wallet to Send"
+            ? 'Connect Wallet to Send'
             : isPending
-              ? "Sending..."
-              : "Send Tokens"}
+              ? 'Sending...'
+              : 'Send Tokens'}
         </button>
       </form>
 
