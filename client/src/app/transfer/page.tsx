@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Connect } from "../../components/wallet/Connect";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAccount } from "wagmi";
+import { useWalletContext } from "../../context/WalletContext";
 import {
   useTransferToken,
   useGetTokenBalance,
@@ -108,7 +108,7 @@ export default function TransactionPage() {
   const [amount, setAmount] = useState("");
   const [coinType, setCoinType] = useState(coins[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isConnected, address } = useAccount();
+  const { isConnected, address } = useWalletContext();
 
   // For ERC20 token transfers
   const {

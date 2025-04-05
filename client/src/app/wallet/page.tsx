@@ -26,6 +26,7 @@ import {
   useAddToken,
   useRemoveToken,
 } from "../../hooks/useContractFunctions";
+import { useWalletContext } from "../../context/WalletContext";
 
 // Example of a component using the individual hooks
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
@@ -141,7 +142,7 @@ const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
 // Main wallet dashboard using the unified wallet hook
 export default function WalletDashboard() {
   const {
-    userTokens,
+    tokens,
     tokenBalances,
     isLoading: walletLoading,
     addToken,
@@ -542,8 +543,8 @@ export default function WalletDashboard() {
 
 // User Tokens List Component - Using the useGetUserTokens hook
 function UserTokensList() {
-  const { userTokens, isLoading, isError, error } = useGetUserTokens();
-  const { isConnected } = useAccount();
+  const { tokens, isLoading, isError, error } = useGetUserTokens();
+  const { isConnected } = useWalletContext();
 
   if (!isConnected) {
     return (
@@ -569,7 +570,7 @@ function UserTokensList() {
     );
   }
 
-  if (userTokens.length === 0) {
+  if (!tokens || tokens.length === 0) {
     return (
       <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10 text-center">
         <p className="text-white">No tokens found in your wallet</p>
@@ -580,7 +581,7 @@ function UserTokensList() {
   return (
     <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
       <ul className="divide-y divide-foreground/10">
-        {userTokens.map((token, index) => (
+        {tokens.map((token: `0x${string}`, index: number) => (
           <li key={index} className="py-3 flex justify-between items-center">
             <span className="text-white font-mono">{token}</span>
             <TokenBalance tokenAddress={token} />

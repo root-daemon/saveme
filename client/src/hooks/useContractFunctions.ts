@@ -1,5 +1,4 @@
 import {
-  useAccount,
   useReadContract,
   useWriteContract,
   useSendTransaction as useWagmiSendTransaction,
@@ -8,12 +7,13 @@ import {
 import { WalletABI, WALLET_CONTRACT_ADDRESS } from "../lib/contract";
 import { parseEther, formatEther } from "viem";
 import { useState, useEffect } from "react";
+import { useWalletContext } from "../context/WalletContext";
 
 type Address = `0x${string}`;
 
 // Hook for getting native ETH balance
 export function useNativeBalance() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
 
   const {
     data: balanceData,
@@ -37,7 +37,7 @@ export function useNativeBalance() {
 
 // Hook for getting user tokens
 export function useGetUserTokens() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
 
   const {
     data: tokens,
@@ -57,6 +57,7 @@ export function useGetUserTokens() {
 
   return {
     tokens: tokens as Address[] | undefined,
+    userTokens: tokens as Address[] | undefined,
     isLoading,
     isError,
     error,
@@ -66,7 +67,7 @@ export function useGetUserTokens() {
 
 // Hook for getting token balance
 export function useGetTokenBalance(tokenAddress?: Address) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
 
   const {
     data: balance,
@@ -96,7 +97,7 @@ export function useGetTokenBalance(tokenAddress?: Address) {
 
 // Hook for adding tokens
 export function useAddToken() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
@@ -149,7 +150,7 @@ export function useAddToken() {
 
 // Hook for removing tokens
 export function useRemoveToken() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
@@ -202,7 +203,7 @@ export function useRemoveToken() {
 
 // Hook for transferring tokens
 export function useTransferToken() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
@@ -257,14 +258,14 @@ export function useTransferToken() {
   };
 }
 
-// Hook for getting all token balances
+// Hook for getting all balances
 export function useGetAllBalances() {
   const { tokens, isLoading: tokensLoading } = useGetUserTokens();
   const [tokenBalances, setTokenBalances] = useState<
-    Array<{ token: Address; balance: string }>
+    { token: Address; balance: string }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -305,7 +306,7 @@ export function useGetAllBalances() {
 
 // Unified hook for wallet functionality
 export function useWalletFunctions() {
-  const { tokens, refetch: refetchTokens } = useGetUserTokens();
+  const { tokens, userTokens, refetch: refetchTokens } = useGetUserTokens();
   const {
     addToken,
     isPending: isAddPending,
@@ -317,7 +318,7 @@ export function useWalletFunctions() {
     isSuccess: isRemoveSuccess,
   } = useRemoveToken();
   const { tokenBalances, isLoading } = useGetAllBalances();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
 
   // Refresh data when operations succeed
   useEffect(() => {
@@ -328,6 +329,7 @@ export function useWalletFunctions() {
 
   return {
     tokens,
+    userTokens,
     tokenBalances,
     isLoading,
     addToken,
@@ -341,7 +343,7 @@ export function useWalletFunctions() {
 
 // Hook for sending native ETH
 export function useSendTransaction() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
