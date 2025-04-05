@@ -25,18 +25,62 @@ import {
   useGetTokenBalance,
   useAddToken,
   useRemoveToken,
+  useNativeBalance,
+  formatBalance,
 } from "../../hooks/useContractFunctions";
 import { useWalletContext } from "../../context/WalletContext";
 
 // Example of a component using the individual hooks
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const { balance, isLoading, isError } = useGetTokenBalance(tokenAddress);
+  const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
 
-  if (isLoading) return <span className="text-white">Loading...</span>;
+  // Use the ethBalance for ETH tokens
+  const isEth = tokenAddress === EXAMPLE_TOKENS.ETH;
+  const displayBalance = isEth ? ethBalance : balance;
+  const displayLoading = isEth ? ethLoading : isLoading;
+
+  if (displayLoading) return <span className="text-white">Loading...</span>;
   if (isError)
     return <span className="text-red-400">Error loading balance</span>;
 
-  return <span className="text-white">Balance: {balance}</span>;
+  return <span className="text-white">{formatBalance(displayBalance)}</span>;
+};
+
+// Enhanced token display component that shows both USD value and token amount
+const TokenDisplay = ({
+  token,
+  symbol,
+  price,
+}: {
+  token: `0x${string}`;
+  symbol: string;
+  price: number;
+}) => {
+  const { balance, isLoading } = useGetTokenBalance(token);
+  // For ETH, we can use the direct balance from the wallet
+  const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
+
+  // Use ethBalance directly for ETH tokens
+  const isEth = token === EXAMPLE_TOKENS.ETH;
+  const displayBalance = isEth ? ethBalance : balance;
+  const displayLoading = isEth ? ethLoading : isLoading;
+
+  // Calculate USD value
+  const usdValue = !displayLoading ? parseFloat(displayBalance) * price : 0;
+
+  if (displayLoading) return <span className="text-white">Loading...</span>;
+
+  return (
+    <div className="flex flex-col">
+      <span className="text-white font-medium">
+        {formatBalance(displayBalance)} {symbol}
+      </span>
+      <span className="text-foreground text-sm">
+        ≈ ${usdValue.toFixed(2)} USD
+      </span>
+    </div>
+  );
 };
 
 // Example of a component for adding tokens
@@ -177,10 +221,17 @@ export default function WalletDashboard() {
   };
 
   const getCryptoPrice = (symbol: string) => {
-    const crypto = prices.find(
+    const crypto = prices?.find(
       (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
     );
     return crypto ? formatPrice(crypto.price) : "Loading...";
+  };
+
+  const getTokenPriceValue = (symbol: string): number => {
+    const crypto = prices?.find(
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+    );
+    return crypto?.price || 0;
   };
 
   const getTokenBalanceByAddress = (address: string) => {
@@ -310,8 +361,12 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                {/* Using TokenBalance component for ETH */}
-                <TokenBalance tokenAddress={EXAMPLE_TOKENS.ETH} />
+                {/* Using TokenDisplay component for ETH */}
+                <TokenDisplay
+                  token={EXAMPLE_TOKENS.ETH}
+                  symbol="ETH"
+                  price={getTokenPriceValue("ETH")}
+                />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.ETH)}
                   className="text-red-400 hover:text-red-300"
@@ -332,8 +387,12 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                {/* Using TokenBalance component for BTC */}
-                <TokenBalance tokenAddress={EXAMPLE_TOKENS.BTC} />
+                {/* Using TokenDisplay component for BTC */}
+                <TokenDisplay
+                  token={EXAMPLE_TOKENS.BTC}
+                  symbol="BTC"
+                  price={getTokenPriceValue("BTC")}
+                />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.BTC)}
                   className="text-red-400 hover:text-red-300"
@@ -354,8 +413,12 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                {/* Using TokenBalance component for LINK */}
-                <TokenBalance tokenAddress={EXAMPLE_TOKENS.LINK} />
+                {/* Using TokenDisplay component for LINK */}
+                <TokenDisplay
+                  token={EXAMPLE_TOKENS.LINK}
+                  symbol="LINK"
+                  price={getTokenPriceValue("LINK")}
+                />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.LINK)}
                   className="text-red-400 hover:text-red-300"
@@ -376,8 +439,12 @@ export default function WalletDashboard() {
                 </div>
               </div>
               <div className="flex justify-between mt-4">
-                {/* Using TokenBalance component for DOT */}
-                <TokenBalance tokenAddress={EXAMPLE_TOKENS.DOT} />
+                {/* Using TokenDisplay component for DOT */}
+                <TokenDisplay
+                  token={EXAMPLE_TOKENS.DOT}
+                  symbol="DOT"
+                  price={getTokenPriceValue("DOT")}
+                />
                 <button
                   onClick={() => openRemoveModal(EXAMPLE_TOKENS.DOT)}
                   className="text-red-400 hover:text-red-300"
@@ -545,6 +612,7 @@ export default function WalletDashboard() {
 function UserTokensList() {
   const { tokens, isLoading, isError, error } = useGetUserTokens();
   const { isConnected } = useWalletContext();
+  const { prices } = useCryptoPrice();
 
   if (!isConnected) {
     return (
@@ -578,15 +646,53 @@ function UserTokensList() {
     );
   }
 
+  const getTokenSymbol = (address: string): string => {
+    if (address === EXAMPLE_TOKENS.ETH) return "ETH";
+    if (address === EXAMPLE_TOKENS.BTC) return "BTC";
+    if (address === EXAMPLE_TOKENS.LINK) return "LINK";
+    if (address === EXAMPLE_TOKENS.DOT) return "DOT";
+    return "TOKEN";
+  };
+
+  const getTokenPrice = (symbol: string): number => {
+    const crypto = prices?.find(
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+    );
+    return crypto?.price || 0;
+  };
+
   return (
     <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">
       <ul className="divide-y divide-foreground/10">
-        {tokens.map((token: `0x${string}`, index: number) => (
-          <li key={index} className="py-3 flex justify-between items-center">
-            <span className="text-white font-mono">{token}</span>
-            <TokenBalance tokenAddress={token} />
-          </li>
-        ))}
+        {tokens.map((token: `0x${string}`, index: number) => {
+          const symbol = getTokenSymbol(token);
+          const price = getTokenPrice(symbol);
+          return (
+            <li key={index} className="py-4 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                {symbol === "ETH" && (
+                  <FaEthereum className="text-white text-xl" />
+                )}
+                {symbol === "BTC" && (
+                  <FaBitcoin className="text-white text-xl" />
+                )}
+                {symbol === "LINK" && (
+                  <SiChainlink className="text-white text-xl" />
+                )}
+                {symbol === "DOT" && (
+                  <SiPolkadot className="text-white text-xl" />
+                )}
+                <div>
+                  <span className="text-white font-medium">{symbol}</span>
+                  <p className="text-foreground/60 text-xs font-mono">
+                    {token.slice(0, 6)}...{token.slice(-4)}
+                  </p>
+                </div>
+              </div>
+              <TokenDisplay token={token} symbol={symbol} price={price} />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 import { Connect } from "../../components/wallet/Connect";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWalletContext } from "../../context/WalletContext";
+import { useCryptoPrice } from "../../hooks/useCryptoPrice";
 import {
   useTransferToken,
   useGetTokenBalance,
   useSendTransaction,
   useNativeBalance,
+  formatBalance,
 } from "../../hooks/useContractFunctions";
 import {
   SiEthereum,
@@ -109,6 +111,7 @@ export default function TransactionPage() {
   const [coinType, setCoinType] = useState(coins[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isConnected, address } = useWalletContext();
+  const { prices, loading: pricesLoading } = useCryptoPrice();
 
   // For ERC20 token transfers
   const {
@@ -138,15 +141,18 @@ export default function TransactionPage() {
   const { balance: ethBalance, isLoading: isEthBalanceLoading } =
     useNativeBalance();
 
-  const [statusMessage, setStatusMessage] = useState("");
-
   // Determine which balance to display
   const displayBalance =
-    coinType.address === ETH_ADDRESS ? ethBalance : tokenBalance;
+    coinType.address === ETH_ADDRESS
+      ? ethBalance // Use actual ethereum balance
+      : tokenBalance;
+
   const isBalanceLoading =
     coinType.address === ETH_ADDRESS
       ? isEthBalanceLoading
       : isTokenBalanceLoading;
+
+  const [statusMessage, setStatusMessage] = useState("");
 
   // Combined states for UI
   const isPending = isTokenTransferPending || isEthTransferPending;
@@ -212,6 +218,33 @@ export default function TransactionPage() {
     setIsModalOpen(false);
   };
 
+  // Get coin price in USD
+  const getCoinPrice = (symbol: string): number => {
+    const crypto = prices?.find(
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+    );
+    return crypto?.price || 0;
+  };
+
+  // Format USD value
+  const formatUsdValue = (amount: string, symbol: string): string => {
+    if (!amount) return "$0.00";
+    const coinPrice = getCoinPrice(symbol);
+    const usdValue = parseFloat(amount) * coinPrice;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(usdValue);
+  };
+
+  // Add the following near the top of the component
+  const getAvailableBalance = () => {
+    if (isBalanceLoading) return "Loading...";
+    return `${formatBalance(displayBalance)} ${coinType.symbol}`;
+  };
+
   return (
     <main className="bg-background text-white min-h-screen flex flex-col items-center justify-center px-4">
       <div className="absolute top-0 right-4">
@@ -240,8 +273,13 @@ export default function TransactionPage() {
             <span className="text-lg text-color">{coinType.symbol}</span>
           </div>
           {!isBalanceLoading && (
-            <div className="mt-2 text-sm">
-              Available: {displayBalance} {coinType.symbol}
+            <div className="mt-2 text-sm flex flex-col items-center">
+              <div>Available: {getAvailableBalance()}</div>
+              {amount && (
+                <div className="text-foreground">
+                  ≈ {formatUsdValue(amount, coinType.symbol)} USD
+                </div>
+              )}
             </div>
           )}
         </div>
