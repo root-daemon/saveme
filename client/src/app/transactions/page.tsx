@@ -34,7 +34,6 @@ export default function TransactionsPage() {
 
           <div className="flex gap-4">
             <Connect />
-
           </div>
         </div>
         <div className="bg-foreground/10 p-8 rounded-full">

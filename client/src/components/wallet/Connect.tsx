@@ -3,7 +3,6 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useWalletContext } from "../../context/WalletContext";
 
 export const Connect = () => {
-  
   const { isConnected } = useWalletContext();
 
   return (

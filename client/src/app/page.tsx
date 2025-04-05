@@ -44,18 +44,21 @@ export default function Home() {
       </div>
 
       <section className="mb-24 mt-48">
-        <h3 className="text-3xl font-semibold text-white mb-5">How we <RotatingText
-          texts={['do it?', 'find it?', 'snap it']}
-          mainClassName="px-2 sm:px-2 md:px-3 bg-foreground inline-flex text-black overflow-hidden py-1 justify-center rounded-lg"
-          staggerFrom={"last"}
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "-120%" }}
-          staggerDuration={0.025}
-          splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-          transition={{ type: "spring", damping: 30, stiffness: 400 }}
-          rotationInterval={2000}
-        /></h3>
+        <h3 className="text-3xl font-semibold text-white mb-5">
+          How we{" "}
+          <RotatingText
+            texts={["do it?", "find it?", "snap it"]}
+            mainClassName="px-2 sm:px-2 md:px-3 bg-foreground inline-flex text-black overflow-hidden py-1 justify-center rounded-lg"
+            staggerFrom={"last"}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-120%" }}
+            staggerDuration={0.025}
+            splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+            transition={{ type: "spring", damping: 30, stiffness: 400 }}
+            rotationInterval={2000}
+          />
+        </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-background/20 backdrop-blur-sm p-6 rounded-lg border border-foreground/10">

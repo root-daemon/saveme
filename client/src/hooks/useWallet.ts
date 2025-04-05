@@ -51,7 +51,7 @@ export function useWallet() {
         args: [token, parseEther(amount)],
       });
     },
-    [address, writeAddToken]
+    [address, writeAddToken],
   );
 
   const {
@@ -72,7 +72,7 @@ export function useWallet() {
         args: [token, parseEther(amount)],
       });
     },
-    [address, writeRemoveToken]
+    [address, writeRemoveToken],
   );
 
   const updateBalances = useCallback(async () => {

@@ -12,19 +12,16 @@ export interface Transaction {
   isIncoming: boolean;
 }
 
-
 export function useTransactionHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  
   const wagmiAccount = useAccount();
   const { address, isConnected } = useWalletContext();
   const publicClient = usePublicClient();
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
-  
   const walletAddress = address || wagmiAccount.address;
 
   useEffect(() => {
@@ -40,26 +37,20 @@ export function useTransactionHistory() {
       setError(null);
 
       try {
-        
-        
         const lookbackBlocks = 10;
         const blockRange = Math.min(Number(blockNumber), lookbackBlocks);
 
-        
         const processedTxs: Transaction[] = [];
 
-        
         for (let i = 0; i < blockRange; i++) {
           try {
             const blockNum = BigInt(Number(blockNumber) - i);
 
-            
             const block = await publicClient.getBlock({
               blockNumber: blockNum,
               includeTransactions: true,
             });
 
-            
             if (
               !block.transactions ||
               typeof block.transactions[0] === "string"
@@ -67,7 +58,6 @@ export function useTransactionHistory() {
               continue;
             }
 
-            
             for (const tx of block.transactions) {
               if (typeof tx === "string") continue;
 
@@ -92,16 +82,13 @@ export function useTransactionHistory() {
           } catch (blockError) {
             console.warn(
               `Error processing block ${Number(blockNumber) - i}:`,
-              blockError
+              blockError,
             );
-            
           }
         }
 
-        
         if (!isMounted) return;
 
-        
         processedTxs.sort((a, b) => b.timestamp - a.timestamp);
         setTransactions(processedTxs);
       } catch (err) {
@@ -110,7 +97,7 @@ export function useTransactionHistory() {
           setError(
             err instanceof Error
               ? err
-              : new Error("Failed to fetch transactions")
+              : new Error("Failed to fetch transactions"),
           );
         }
       } finally {
@@ -122,7 +109,6 @@ export function useTransactionHistory() {
 
     fetchTransactionHistory();
 
-    
     const intervalId = setInterval(fetchTransactionHistory, 30000);
 
     return () => {
@@ -131,12 +117,9 @@ export function useTransactionHistory() {
     };
   }, [walletAddress, publicClient, blockNumber]);
 
-  
-  
   const useDummyData = false;
 
   if (useDummyData) {
-    
     const now = Math.floor(Date.now() / 1000);
     const dummyTxs: Transaction[] = [
       {

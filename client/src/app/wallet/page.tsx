@@ -33,12 +33,10 @@ import { useTransactionHistory } from "../../hooks/useTransactionHistory";
 import TransactionList from "../../components/wallet/TransactionList";
 import Link from "next/link";
 
-
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const { balance, isLoading, isError } = useGetTokenBalance(tokenAddress);
   const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
 
-  
   const isEth = tokenAddress === EXAMPLE_TOKENS.ETH;
   const displayBalance = isEth ? ethBalance : balance;
   const displayLoading = isEth ? ethLoading : isLoading;
@@ -50,7 +48,6 @@ const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   return <span className="text-white">{formatBalance(displayBalance)}</span>;
 };
 
-
 const TokenDisplay = ({
   token,
   symbol,
@@ -61,15 +58,13 @@ const TokenDisplay = ({
   price: number;
 }) => {
   const { balance, isLoading } = useGetTokenBalance(token);
-  
+
   const { balance: ethBalance, isLoading: ethLoading } = useNativeBalance();
 
-  
   const isEth = token === EXAMPLE_TOKENS.ETH;
   const displayBalance = isEth ? ethBalance : balance;
   const displayLoading = isEth ? ethLoading : isLoading;
 
-  
   const usdValue = !displayLoading ? parseFloat(displayBalance) * price : 0;
 
   if (displayLoading) return <span className="text-white">Loading...</span>;
@@ -85,7 +80,6 @@ const TokenDisplay = ({
     </div>
   );
 };
-
 
 const AddTokenForm = () => {
   const [tokenAddress, setTokenAddress] = useState("");
@@ -142,7 +136,6 @@ const AddTokenForm = () => {
   );
 };
 
-
 const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
   const [amount, setAmount] = useState("");
   const { removeToken, isPending, isSuccess, isError } = useRemoveToken();
@@ -185,7 +178,6 @@ const RemoveTokenForm = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
     </form>
   );
 };
-
 
 export default function WalletDashboard() {
   const {
@@ -231,21 +223,21 @@ export default function WalletDashboard() {
 
   const getCryptoPrice = (symbol: string) => {
     const crypto = prices?.find(
-      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase(),
     );
     return crypto ? formatPrice(crypto.price) : "Loading...";
   };
 
   const getTokenPriceValue = (symbol: string): number => {
     const crypto = prices?.find(
-      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase(),
     );
     return crypto?.price || 0;
   };
 
   const getTokenBalanceByAddress = (address: string) => {
     const token = tokenBalances.find(
-      (t) => t.token.toLowerCase() === address.toLowerCase()
+      (t) => t.token.toLowerCase() === address.toLowerCase(),
     );
     return token ? token.balance : "0";
   };
@@ -583,7 +575,6 @@ export default function WalletDashboard() {
   );
 }
 
-
 function UserTokensList() {
   const { tokens, isLoading, isError, error } = useGetUserTokens();
   const { isConnected } = useWalletContext();
@@ -631,7 +622,7 @@ function UserTokensList() {
 
   const getTokenPrice = (symbol: string): number => {
     const crypto = prices?.find(
-      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase(),
     );
     return crypto?.price || 0;
   };

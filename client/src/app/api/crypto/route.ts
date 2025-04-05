@@ -9,7 +9,7 @@ export async function GET() {
           "X-CMC_PRO_API_KEY": process.env.NEXT_PUBLIC_COIN_BACK_API_KEY || "",
         },
         next: { revalidate: 60 },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -49,7 +49,7 @@ export async function GET() {
           },
         ],
       },
-      { status: 200 }
+      { status: 200 },
     );
   }
 }

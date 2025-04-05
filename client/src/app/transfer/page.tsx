@@ -138,7 +138,7 @@ export default function TransactionPage() {
   // Get token balance from Wallet contract
   const { balance: tokenBalance, isLoading: isTokenBalanceLoading } =
     useGetTokenBalance(
-      coinType.address === ETH_ADDRESS ? undefined : coinType.address
+      coinType.address === ETH_ADDRESS ? undefined : coinType.address,
     );
 
   // Get native ETH balance directly from wallet
@@ -212,7 +212,7 @@ export default function TransactionPage() {
     } catch (err) {
       console.error("Error submitting transaction:", err);
       setStatusMessage(
-        `Error: ${(err as Error).message || "Transaction failed"}`
+        `Error: ${(err as Error).message || "Transaction failed"}`,
       );
     }
   };
@@ -225,7 +225,7 @@ export default function TransactionPage() {
   // Get coin price in USD
   const getCoinPrice = (symbol: string): number => {
     const crypto = prices?.find(
-      (p) => p.symbol.toLowerCase() === symbol.toLowerCase()
+      (p) => p.symbol.toLowerCase() === symbol.toLowerCase(),
     );
     return crypto?.price || 0;
   };
@@ -285,13 +285,13 @@ export default function TransactionPage() {
       }
       if (data.symbol) {
         const selectedCoin = coins.find(
-          (c) => c.symbol.toUpperCase() === data.symbol.toUpperCase()
+          (c) => c.symbol.toUpperCase() === data.symbol.toUpperCase(),
         );
         if (selectedCoin) {
           setCoinType(selectedCoin);
         } else {
           console.warn(
-            `Coin symbol "${data.symbol}" not found in predefined list.`
+            `Coin symbol "${data.symbol}" not found in predefined list.`,
           );
           // Optionally set an error message or default coin
         }
@@ -374,8 +374,8 @@ export default function TransactionPage() {
               isError
                 ? "bg-red-900/30 text-red-200"
                 : isSuccess
-                ? "bg-green-900/30 text-green-200"
-                : "bg-blue-900/30 text-blue-200"
+                  ? "bg-green-900/30 text-green-200"
+                  : "bg-blue-900/30 text-blue-200"
             }`}
           >
             {statusMessage}
@@ -398,8 +398,8 @@ export default function TransactionPage() {
           {!isConnected
             ? "Connect Wallet to Send"
             : isPending
-            ? "Sending..."
-            : "Send Tokens"}
+              ? "Sending..."
+              : "Send Tokens"}
         </button>
       </form>
 

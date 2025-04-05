@@ -11,23 +11,19 @@ import { useWalletContext } from "../context/WalletContext";
 
 type Address = `0x${string}`;
 
-
 export const formatBalance = (
   balance: string | undefined,
-  decimals = 4
+  decimals = 4,
 ): string => {
   if (!balance) return "0";
 
-  
   const num = parseFloat(balance);
   if (num === 0) return "0";
 
   const formattedBalance = num.toFixed(decimals);
 
-  
   return formattedBalance.replace(/\.?0+$/, "");
 };
-
 
 export function useNativeBalance() {
   const { address, isConnected } = useWalletContext();
@@ -51,7 +47,6 @@ export function useNativeBalance() {
     refetch,
   };
 }
-
 
 export function useGetUserTokens() {
   const { address, isConnected } = useWalletContext();
@@ -82,7 +77,6 @@ export function useGetUserTokens() {
   };
 }
 
-
 export function useGetTokenBalance(tokenAddress?: Address) {
   const { address, isConnected } = useWalletContext();
 
@@ -112,7 +106,6 @@ export function useGetTokenBalance(tokenAddress?: Address) {
   };
 }
 
-
 export function useAddToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -129,7 +122,7 @@ export function useAddToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      
+
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -165,7 +158,6 @@ export function useAddToken() {
   };
 }
 
-
 export function useRemoveToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -182,7 +174,7 @@ export function useRemoveToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      
+
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -218,7 +210,6 @@ export function useRemoveToken() {
   };
 }
 
-
 export function useTransferToken() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -235,7 +226,7 @@ export function useTransferToken() {
   useEffect(() => {
     if (writeSuccess) {
       setIsSuccess(true);
-      
+
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
@@ -246,7 +237,7 @@ export function useTransferToken() {
   const transferToken = async (
     tokenAddress: Address,
     toAddress: Address,
-    amount: string
+    amount: string,
   ) => {
     if (!isConnected || !address) {
       console.error("Wallet not connected");
@@ -275,7 +266,6 @@ export function useTransferToken() {
   };
 }
 
-
 export function useGetAllBalances() {
   const { tokens, isLoading: tokensLoading } = useGetUserTokens();
   const {
@@ -288,7 +278,7 @@ export function useGetAllBalances() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const { address, isConnected } = useWalletContext();
-  const ETH_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address; 
+  const ETH_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address;
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -304,40 +294,35 @@ export function useGetAllBalances() {
         let balances: { token: Address; balance: string; symbol: string }[] =
           [];
 
-        
-        
         balances.push({
           token: ETH_ADDRESS,
-          balance: ethBalance, 
+          balance: ethBalance,
           symbol: ethSymbol || "ETH",
         });
 
-        
         if (tokens && tokens.length > 0) {
-          
           const otherTokens = tokens.filter(
-            (token) => token.toLowerCase() !== ETH_ADDRESS.toLowerCase()
+            (token) => token.toLowerCase() !== ETH_ADDRESS.toLowerCase(),
           );
 
-          
           const dummyBalances = otherTokens.map((token) => ({
             token,
             balance:
               token === "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
                 ? "0.05"
                 : token === "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-                ? "1.25"
-                : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-                ? "10.5"
-                : "0.01", 
+                  ? "1.25"
+                  : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+                    ? "10.5"
+                    : "0.01",
             symbol:
               token === "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
                 ? "BTC"
                 : token === "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
-                ? "LINK"
-                : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-                ? "DOT"
-                : "TOKEN",
+                  ? "LINK"
+                  : token === "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+                    ? "DOT"
+                    : "TOKEN",
           }));
 
           balances = [...balances, ...dummyBalances];
@@ -360,7 +345,6 @@ export function useGetAllBalances() {
   };
 }
 
-
 export function useWalletFunctions() {
   const { tokens, userTokens, refetch: refetchTokens } = useGetUserTokens();
   const {
@@ -376,7 +360,6 @@ export function useWalletFunctions() {
   const { tokenBalances, isLoading } = useGetAllBalances();
   const { address, isConnected } = useWalletContext();
 
-  
   useEffect(() => {
     if (isAddSuccess || isRemoveSuccess) {
       refetchTokens();
@@ -397,7 +380,6 @@ export function useWalletFunctions() {
   };
 }
 
-
 export function useSendTransaction() {
   const { address, isConnected } = useWalletContext();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -414,7 +396,7 @@ export function useSendTransaction() {
   useEffect(() => {
     if (wagmiIsSuccess) {
       setIsSuccess(true);
-      
+
       const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 3000);

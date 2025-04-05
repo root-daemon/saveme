@@ -11,7 +11,7 @@ export async function GET() {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to fetch data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!imageBuffer || !tokenAddress) {
       return NextResponse.json(
         { error: "Missing imageBuffer or tokenAddress." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!imgbbKey) {
       return NextResponse.json(
         { error: "IMGBB_API_KEY environment variable is not configured." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (!imgbbData?.data?.url) {
       return NextResponse.json(
         { error: "Failed to upload image to imgbb." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     console.error(error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

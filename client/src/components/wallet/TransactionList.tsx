@@ -161,7 +161,7 @@ export default function TransactionList({
   const startIndex = (page - 1) * pageSize;
   const displayedTransactions = transactions.slice(
     startIndex,
-    startIndex + pageSize
+    startIndex + pageSize,
   );
 
   const handlePrevPage = () => {

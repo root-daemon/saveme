@@ -2,12 +2,11 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-
 const transactionSchema = z.object({
   toAddress: z
     .string()
     .describe(
-      "The recipient Ethereum address (e.g., 0x...) or ENS name (e.g., vitalik.eth)"
+      "The recipient Ethereum address (e.g., 0x...) or ENS name (e.g., vitalik.eth)",
     ),
   amount: z
     .string()
@@ -17,12 +16,10 @@ const transactionSchema = z.object({
     .describe("The symbol of the cryptocurrency (e.g., ETH, USDC, USDT)"),
 });
 
-
 export const maxDuration = 30;
 
-
 const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY, 
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 });
 
 export async function POST(req: Request) {
@@ -42,14 +39,13 @@ export async function POST(req: Request) {
       prompt: `Extract the transaction details from the following text: "${inputText}". Identify the recipient address (or ENS name), the amount, and the cryptocurrency symbol. Only return the extracted data in the specified format. Do not give undefined or unknown in the content`,
     });
 
-    
     return new Response(JSON.stringify(transactionDetails), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("API Error:", error);
-    
+
     const errorMessage =
       error instanceof Error
         ? error.message
