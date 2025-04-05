@@ -1,18 +1,58 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowRight, FaPlus, FaCoins } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { Connect } from '../../components/wallet/Connect';
 import { useWalletContext } from '../../context/WalletContext';
+import { useTokenCreation } from '../../hooks/useTokenCreation';
+import { toast, Toaster } from 'react-hot-toast';
 
 export default function CreateTokenPage() {
   const [step, setStep] = useState(1);
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
+  const [initialSupply, setInitialSupply] = useState('1000000');
   const [tokenImage, setTokenImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address } = useWalletContext();
+  const {
+    createToken,
+    saveTokenImage,
+    isLoading,
+    isPending,
+    isConfirming,
+    isConfirmed,
+    isError,
+    error,
+    newTokenAddress,
+    creationData,
+  } = useTokenCreation();
+
+  // Effect to handle successful token creation
+  useEffect(() => {
+    if (isConfirmed && newTokenAddress && tokenImage) {
+      // Save token image after successful token creation
+      const saveImage = async () => {
+        try {
+          await saveTokenImage(newTokenAddress, tokenImage);
+          toast.success('Token image saved successfully!');
+        } catch (err) {
+          console.error('Failed to save token image:', err);
+          toast.error('Failed to save token image');
+        }
+      };
+
+      saveImage();
+    }
+  }, [isConfirmed, newTokenAddress, tokenImage, saveTokenImage]);
+
+  // Show success message when token is confirmed
+  useEffect(() => {
+    if (isConfirmed && newTokenAddress) {
+      toast.success(`Token created successfully! Address: ${newTokenAddress}`);
+    }
+  }, [isConfirmed, newTokenAddress]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,14 +83,27 @@ export default function CreateTokenPage() {
     }
   };
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    // Here you would implement the actual token creation logic
-    console.log({
-      tokenName,
-      tokenSymbol,
-      tokenImage,
-    });
+
+    if (!isConnected || !address) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    if (!tokenName || !tokenSymbol) {
+      toast.error('Please provide both token name and symbol');
+      return;
+    }
+
+    try {
+      // Create token through our hook
+      createToken(tokenName, tokenSymbol, initialSupply);
+      toast.success('Token creation initiated!');
+    } catch (err) {
+      console.error('Error creating token:', err);
+      toast.error('Failed to create token');
+    }
   };
 
   const fadeInUpVariant = {
@@ -94,15 +147,25 @@ export default function CreateTokenPage() {
         }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.1 }}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         onClick={onClick}
         className={`${
           fullWidth ? 'w-full' : 'flex-1'
         } flex items-center justify-center gap-2 bg-foreground/10 cursor-pointer text-foreground py-3 rounded-full font-medium transition-all ${
-          disabled ? 'opacity-50 cursor-not-allowed' : ''
+          disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        {children}
+        {isLoading ? (
+          <span>
+            {isPending
+              ? 'Waiting for approval...'
+              : isConfirming
+              ? 'Confirming transaction...'
+              : 'Processing...'}
+          </span>
+        ) : (
+          children
+        )}
       </motion.button>
     );
   };
@@ -121,6 +184,7 @@ export default function CreateTokenPage() {
 
   return (
     <main className="bg-background text-white min-h-screen flex flex-col items-center justify-center px-4">
+      <Toaster />
       <div className="absolute top-4 right-4">
         <Connect />
       </div>
@@ -266,44 +330,68 @@ export default function CreateTokenPage() {
             >
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium mb-4">Token Image</h3>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleImageClick}
-                    className="w-full h-40 flex flex-col items-center justify-center bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors"
-                  >
-                    {tokenImage ? (
-                      <div className="relative">
-                        <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-foreground/30 ring-offset-2 ring-offset-background">
-                          <img
-                            src={tokenImage}
-                            alt="Token"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <p className="text-foreground text-sm mt-2 text-center">
-                          Change Image
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-2">
-                          <FaPlus className="text-foreground text-xl" />
-                        </div>
-                        <p className="text-foreground text-sm">
-                          Upload token icon
-                        </p>
-                      </>
-                    )}
-                  </motion.div>
+                  <h3 className="text-lg font-medium mb-4">Token Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-foreground/70 mb-1 block">
+                        Initial Supply
+                      </label>
+                      <input
+                        type="text"
+                        value={initialSupply}
+                        onChange={(e) => setInitialSupply(e.target.value)}
+                        placeholder="e.g. 1000000"
+                        className="w-full bg-white/5 rounded-xl px-4 py-3 outline-none"
+                      />
+                      <p className="text-xs text-foreground/60 mt-2">
+                        Initial token supply (all tokens will be sent to your
+                        wallet)
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm text-foreground/70 mb-1 block">
+                        Token Image (Optional)
+                      </label>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleImageClick}
+                        className="w-full h-40 flex flex-col items-center justify-center bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors"
+                      >
+                        {tokenImage ? (
+                          <div className="relative">
+                            <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-foreground/30 ring-offset-2 ring-offset-background">
+                              <img
+                                src={tokenImage}
+                                alt="Token"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <p className="text-foreground text-sm mt-2 text-center">
+                              Change Image
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-2">
+                              <FaPlus className="text-foreground text-xl" />
+                            </div>
+                            <p className="text-foreground text-sm">
+                              Upload token icon
+                            </p>
+                          </>
+                        )}
+                      </motion.div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col justify-between bg-white/5 rounded-xl px-4 py-5">
@@ -319,6 +407,12 @@ export default function CreateTokenPage() {
                       <span className="text-foreground/70">Symbol</span>
                       <span className="text-white font-medium">
                         {tokenSymbol}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-foreground/70">Supply</span>
+                      <span className="text-white font-medium">
+                        {initialSupply}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -361,6 +455,30 @@ export default function CreateTokenPage() {
           >
             <p className="text-red-400 text-sm text-center">
               Please connect your wallet to create a token
+            </p>
+          </motion.div>
+        )}
+
+        {isError && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-red-500/10 rounded-xl"
+          >
+            <p className="text-red-400 text-sm text-center">
+              Error creating token: {error?.message || 'Unknown error'}
+            </p>
+          </motion.div>
+        )}
+
+        {isConfirmed && newTokenAddress && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-green-500/10 rounded-xl"
+          >
+            <p className="text-green-400 text-sm text-center">
+              Token created successfully! Address: {newTokenAddress}
             </p>
           </motion.div>
         )}
