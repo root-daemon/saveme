@@ -21,7 +21,7 @@ interface CandlestickData {
 
 const generateRugPullData = (): CandlestickData[] => {
   const data: CandlestickData[] = [];
-  const startDate = new Date('2024-05-01');
+  const startDate = new Date('2024-09-01');
   const endDate = new Date('2025-03-31');
 
   const daysDiff = Math.floor(
@@ -82,7 +82,7 @@ export default function CryptoChart() {
   const [rugPullInProgress, setRugPullInProgress] = useState<boolean>(false);
   const [rugPullComplete, setRugPullComplete] = useState<boolean>(false);
   const [rugPullStage, setRugPullStage] = useState<number>(0);
-  const [rugPullIntensity, setRugPullIntensity] = useState<number>(30);
+  const [rugPullIntensity, setRugPullIntensity] = useState<number>(4);
 
   const {
     agents,
@@ -380,14 +380,13 @@ export default function CryptoChart() {
 
     ctx.fillStyle = '#8f9ba8';
     ctx.font = '12px Arial';
+
     ctx.textAlign = 'right';
 
     for (let i = 0; i <= 5; i++) {
       const price = minPrice + ((maxPrice - minPrice) * (5 - i)) / 5;
       const y = i * (canvas.height / 5);
-      // Show more decimal places for micro price changes
-      const decimals = maxPrice - minPrice < 0.001 ? 8 : 6;
-      ctx.fillText(price.toFixed(decimals), canvas.width - 10, y + 15);
+      ctx.fillText(price.toFixed(2), canvas.width - 10, y + 15);
     }
 
     let filteredData = data;
@@ -413,7 +412,11 @@ export default function CryptoChart() {
       filteredData = data.filter((d) => new Date(d.date) >= startDate);
     }
 
-    const candleWidth = Math.max(2, (canvas.width - 80) / filteredData.length);
+    const rightPadding = 50;
+    const candleWidth = Math.max(
+      2,
+      (canvas.width - 80 - rightPadding) / filteredData.length,
+    );
     const candleSpacing = candleWidth * 0.1;
 
     if (isLive && filteredData.length > 1) {
@@ -450,7 +453,7 @@ export default function CryptoChart() {
         return (
           canvas.height -
           20 -
-          ((price - minPrice) / (maxPrice - minPrice)) * (canvas.height - 40)
+          ((price - minPrice) / (maxPrice - minPrice)) * (canvas.height - 60)
         );
       };
 
@@ -481,12 +484,16 @@ export default function CryptoChart() {
 
           ctx.save();
           ctx.globalAlpha = pulseOpacity;
-          ctx.strokeRect(x + 1, bodyY, candleWidth - 2, bodyHeight);
+          ctx.beginPath();
+          ctx.roundRect(x + 1, bodyY, candleWidth - 2, bodyHeight, 4);
+          ctx.stroke();
           ctx.restore();
         } else {
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2;
-          ctx.strokeRect(x + 1, bodyY, candleWidth - 2, bodyHeight);
+          ctx.beginPath();
+          ctx.roundRect(x + 1, bodyY, candleWidth - 2, bodyHeight, 4);
+          ctx.stroke();
         }
         ctx.lineWidth = 1;
       }
@@ -512,7 +519,9 @@ export default function CryptoChart() {
         ctx.fillStyle = '#2d3748';
       }
 
-      ctx.fillRect(x + 1, y, candleWidth - 2, height);
+      ctx.beginPath();
+      ctx.roundRect(x + 1, y, candleWidth - 2, height, 2);
+      ctx.fill();
     });
     ctx.globalAlpha = 1.0;
 
@@ -537,9 +546,9 @@ export default function CryptoChart() {
         ? '#4caf50'
         : '#2d3748';
     ctx.fillRect(canvas.width - 70, currentPriceY - 12, 60, 24);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#000000';
     ctx.textAlign = 'center';
-    ctx.fillText(currentPrice.toFixed(6), canvas.width - 40, currentPriceY + 4);
+    ctx.fillText(currentPrice.toFixed(3), canvas.width - 40, currentPriceY + 4);
 
     ctx.fillStyle = '#8f9ba8';
     ctx.textAlign = 'center';
@@ -606,7 +615,7 @@ export default function CryptoChart() {
       <div className="flex justify-between w-full px-52 gap-32 items-center">
         <div className="flex space-x-2 items-center justify-center">
           <FaEthereum className="text-foreground text-2xl" />
-          <span className="text-white mr-48 text-xl font-semibold">
+          <span className="text-white mr-16 text-xl font-semibold">
             ETH/USD
           </span>
           <Button
@@ -622,37 +631,13 @@ export default function CryptoChart() {
           >
             {showAgents ? 'Hide Agents' : 'Show Agents'}
           </Button>
-
-          {/* Intensity control */}
-          <div className="flex items-center ml-4 space-x-2">
-            <span className="text-white text-xs">Drop Intensity:</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441] h-8 px-2"
-              onClick={() =>
-                setRugPullIntensity(Math.max(10, rugPullIntensity - 10))
-              }
-            >
-              -
-            </Button>
-            <span className="text-white text-xs w-8 text-center">
-              {rugPullIntensity}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441] h-8 px-2"
-              onClick={() =>
-                setRugPullIntensity(Math.min(100, rugPullIntensity + 10))
-              }
-            >
-              +
-            </Button>
-          </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div
+          className="flex items-center space-x-4"
+          style={{ marginRight: '3rem' }}
+        >
+          {/* <FaEthereum className="h-6 w-6 text-blue-400" /> */}
           <Tabs
             defaultValue="1Y"
             className="bg-[#1e2530] rounded-md"
@@ -716,9 +701,9 @@ export default function CryptoChart() {
         </div>
       </div>
 
-      <div className="relative rounded-lg overflow-hidden">
+      <div className="relative rounded-lg overflow-hidden pr-8">
         <div className="h-[700px] w-full relative flex">
-          <div className="flex-1">
+          <div className="flex-1 relative" style={{ paddingRight: '3rem' }}>
             <canvas id="chart" className="w-full h-full"></canvas>
 
             {/* Trading agents panel */}
