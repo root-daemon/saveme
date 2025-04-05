@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+
     "target": "es5",
     "lib": [
       "dom",
@@ -18,11 +19,15 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "paths": {
+			"@/*": ["./*"]
+		},
     "plugins": [
       {
         "name": "next"
       }
     ]
+    
   },
   "include": [
     "**/*.ts",
@@ -32,5 +37,5 @@
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }
