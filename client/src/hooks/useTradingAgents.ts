@@ -33,7 +33,7 @@ interface Agent {
   initialTokens?: number;
 }
 
-export function useTradingAgents(initialPrice: number = 50) {
+export function useTradingAgents(initialPrice: number = 0.004) {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [trades, setTrades] = useState<TradeAction[]>([]);
   const [isRugPullScheduled, setIsRugPullScheduled] = useState<boolean>(false);
@@ -251,7 +251,7 @@ export function useTradingAgents(initialPrice: number = 50) {
     currentPrice: number,
   ): number => {
     if (trades.length === 0) {
-      return (Math.random() - 0.5) * 0.2;
+      return (Math.random() - 0.5) * 0.00003;
     }
 
     const buyVolume = trades
@@ -268,7 +268,7 @@ export function useTradingAgents(initialPrice: number = 50) {
 
     const impact = netVolume / (marketLiquidity + Math.abs(netVolume));
 
-    const impactMultiplier = isRugPullScheduled ? 3 : 1.5;
+    const impactMultiplier = isRugPullScheduled ? 0.0005 : 0.0002;
     const scaledImpact = impact * impactMultiplier * currentPrice * 0.1;
 
     const randomNoise = (Math.random() - 0.5) * 0.3 * Math.abs(scaledImpact);
@@ -289,7 +289,7 @@ export function useTradingAgents(initialPrice: number = 50) {
     const timeDiff = now - lastUpdateTime;
     setLastUpdateTime(now);
 
-    let volatility = 0.8 + Math.random() * 1.8;
+    let volatility = 0.0001 + Math.random() * 0.0003;
     const randomMovement = (Math.random() - 0.5) * volatility * 0.6;
 
     const newTrades: TradeAction[] = [];
@@ -365,15 +365,21 @@ export function useTradingAgents(initialPrice: number = 50) {
 
     if (isRugPullScheduled) {
       if (rugPullCountdown && rugPullCountdown < 10) {
+        // During final countdown, make price drop dramatically
         volatility *= 3;
-        priceChange -= Math.random() * 8 + 2;
+        // Ensure price always goes down during cashout by using a larger negative value
+        priceChange =
+          -Math.abs(priceChange) - (Math.random() * 0.0012 + 0.0003);
       } else {
+        // Even before final countdown, price should start decreasing
         volatility *= 1.5;
-        priceChange += Math.random() * 2 + 0.5;
+        // Ensure price always goes down by making priceChange negative
+        priceChange =
+          -Math.abs(priceChange) * 0.5 - (Math.random() * 0.0002 + 0.00005);
       }
     }
 
-    const newPrice = Math.max(1, currentPrice + priceChange);
+    const newPrice = Math.max(0.0001, currentPrice + priceChange);
 
     const newVolume = newTrades.reduce((sum, trade) => sum + trade.amount, 0);
 

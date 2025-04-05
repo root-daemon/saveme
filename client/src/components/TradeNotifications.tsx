@@ -87,7 +87,7 @@ export default function TradeNotifications({
                             {notification.agentName} {notification.type === 'buy' ? 'bought' : 'sold'} {formatNumber(notification.amount)} tokens
                         </div>
                         <div className="text-xs text-gray-300">
-                            Price: ${notification.price.toFixed(2)}
+                            Price: ${notification.price.toFixed(6)}
                         </div>
                     </div>
                 </div>

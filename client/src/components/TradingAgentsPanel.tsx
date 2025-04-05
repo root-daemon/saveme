@@ -189,7 +189,7 @@ export default function TradingAgentsPanel({
                                         <span className="text-xs text-gray-400">{formatTimestamp(trade.timestamp)}</span>
                                     </div>
                                     <div className="text-xs text-gray-400">
-                                        {trade.type === 'buy' ? 'Bought' : 'Sold'} {formatNumber(trade.amount)} @ ${trade.price.toFixed(2)}
+                                        {trade.type === 'buy' ? 'Bought' : 'Sold'} {formatNumber(trade.amount)} @ ${trade.price.toFixed(6)}
                                     </div>
                                 </div>
                             </div>
