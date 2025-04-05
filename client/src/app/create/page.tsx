@@ -29,30 +29,151 @@ export default function CreateTokenPage() {
     creationData,
   } = useTokenCreation();
 
-  // Effect to handle successful token creation
-  useEffect(() => {
-    if (isConfirmed && newTokenAddress && tokenImage) {
-      // Save token image after successful token creation
-      const saveImage = async () => {
-        try {
-          await saveTokenImage(newTokenAddress, tokenImage);
-          toast.success('Token image saved successfully!');
-        } catch (err) {
-          console.error('Failed to save token image:', err);
-          toast.error('Failed to save token image');
-        }
-      };
-
-      saveImage();
-    }
-  }, [isConfirmed, newTokenAddress, tokenImage, saveTokenImage]);
-
-  // Show success message when token is confirmed
+  // Combined effect to handle token creation success and database saving
   useEffect(() => {
     if (isConfirmed && newTokenAddress) {
       toast.success(`Token created successfully! Address: ${newTokenAddress}`);
+
+      // Save token data to the database
+      const saveTokenData = async () => {
+        try {
+          // Get base64 data if image exists
+          const base64Data = tokenImage ? tokenImage.split(',')[1] : '';
+
+          console.log('Saving token to database:', {
+            tokenAddress: newTokenAddress,
+            tokenName: tokenName || creationData?.name,
+            tokenSymbol: tokenSymbol || creationData?.symbol,
+            initialSupply:
+              initialSupply || creationData?.initialSupply?.toString(),
+            hasImage: !!base64Data,
+          });
+
+          const response = await fetch('/api/savecoin', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              imageBuffer: base64Data,
+              tokenAddress: newTokenAddress,
+              tokenName: tokenName || creationData?.name,
+              tokenSymbol: tokenSymbol || creationData?.symbol,
+              initialSupply:
+                initialSupply || creationData?.initialSupply?.toString(),
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Database save error:', errorData);
+            throw new Error(
+              `Failed to save: ${errorData.error || 'Unknown error'}`,
+            );
+          }
+
+          const data = await response.json();
+          console.log('Token saved to database:', data);
+          toast.success(
+            tokenImage
+              ? 'Token image saved successfully!'
+              : 'Token saved to database!',
+          );
+        } catch (err) {
+          console.error('Failed to save token data:', err);
+          toast.error(
+            `Database error: ${
+              err instanceof Error ? err.message : 'Unknown error'
+            }`,
+          );
+        }
+      };
+
+      saveTokenData();
     }
-  }, [isConfirmed, newTokenAddress]);
+  }, [
+    isConfirmed,
+    newTokenAddress,
+    tokenImage,
+    tokenName,
+    tokenSymbol,
+    initialSupply,
+    creationData,
+  ]);
+
+  // Add debug function to test MongoDB connection directly
+  const testDatabaseConnection = async () => {
+    try {
+      toast.loading('Testing database connection...');
+      const response = await fetch('/api/savecoin/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          test: true,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Database test result:', data);
+      toast.dismiss();
+      toast.success('Database connection successful!');
+    } catch (err) {
+      console.error('Database test error:', err);
+      toast.dismiss();
+      toast.error(
+        `Database connection failed: ${
+          err instanceof Error ? err.message : 'Unknown error'
+        }`,
+      );
+    }
+  };
+
+  // Function to manually save token data
+  const manualSaveToken = async () => {
+    if (!tokenName || !tokenSymbol) {
+      toast.error('Please provide token name and symbol first');
+      return;
+    }
+
+    try {
+      toast.loading('Manually saving token data...');
+
+      const mockTokenAddress = `0x${Math.random()
+        .toString(16)
+        .substring(2, 42)}` as `0x${string}`;
+      const base64Data = tokenImage ? tokenImage.split(',')[1] : '';
+
+      const response = await fetch('/api/savecoin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBuffer: base64Data,
+          tokenAddress: mockTokenAddress,
+          tokenName: tokenName,
+          tokenSymbol: tokenSymbol,
+          initialSupply: initialSupply,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Manual token save result:', data);
+      toast.dismiss();
+      toast.success(`Test token saved with address: ${mockTokenAddress}`);
+    } catch (err) {
+      console.error('Manual token save error:', err);
+      toast.dismiss();
+      toast.error(
+        `Failed to save test token: ${
+          err instanceof Error ? err.message : 'Unknown error'
+        }`,
+      );
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -482,6 +603,32 @@ export default function CreateTokenPage() {
             </p>
           </motion.div>
         )}
+      </motion.div>
+
+      {/* Database Test Button for debugging */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="mt-6 flex justify-center gap-3"
+      >
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={testDatabaseConnection}
+          className="text-xs bg-white/10 hover:bg-white/20 text-foreground/60 py-2 px-4 rounded-lg transition-colors"
+        >
+          Test Database Connection
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={manualSaveToken}
+          className="text-xs bg-white/10 hover:bg-white/20 text-foreground/60 py-2 px-4 rounded-lg transition-colors"
+        >
+          Save Test Token
+        </motion.button>
       </motion.div>
     </main>
   );
