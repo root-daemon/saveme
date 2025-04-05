@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ILiquidityPool {
     function swap(uint256 tokenAmount) external;
+    function swapEthForTokens() external payable;
 }
 
 contract AnomalyGuardWallet {
@@ -31,16 +32,19 @@ contract AnomalyGuardWallet {
 
     function forwardETH() external payable onlyOwner {}
 
+    function swapETHForTokens(uint256 ethAmount) external onlyOwner {
+        require(address(this).balance >= ethAmount, "Not enough ETH");
+        liquidityPool.swapEthForTokens{value: ethAmount}();
+    }
+
     function executeAnomalyExit() external onlyOwner {
         uint256 tokenBalance = token.balanceOf(address(this));
 
         if (tokenBalance > 0) {
-            // Approve LiquidityPool to take tokens
             token.approve(address(liquidityPool), tokenBalance);
             liquidityPool.swap(tokenBalance);
         }
 
-        // Transfer all ETH to owner
         payable(owner).transfer(address(this).balance);
     }
 }
