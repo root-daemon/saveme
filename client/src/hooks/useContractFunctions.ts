@@ -1,16 +1,46 @@
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useSendTransaction as useWagmiSendTransaction,
+  useBalance,
+} from "wagmi";
 import { WalletABI, WALLET_CONTRACT_ADDRESS } from "../lib/contract";
 import { parseEther, formatEther } from "viem";
 import { useState, useEffect } from "react";
 
 type Address = `0x${string}`;
 
+// Hook for getting native ETH balance
+export function useNativeBalance() {
+  const { address, isConnected } = useAccount();
+
+  const {
+    data: balanceData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useBalance({
+    address,
+  });
+
+  return {
+    balance: balanceData?.formatted || "0",
+    symbol: balanceData?.symbol || "ETH",
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
+}
+
 // Hook for getting user tokens
 export function useGetUserTokens() {
   const { address, isConnected } = useAccount();
 
   const {
-    data: userTokens,
+    data: tokens,
     isLoading,
     isError,
     error,
@@ -20,10 +50,13 @@ export function useGetUserTokens() {
     abi: WalletABI,
     functionName: "getUserTokens",
     account: address,
+    query: {
+      enabled: Boolean(isConnected),
+    },
   });
 
   return {
-    userTokens: (userTokens || []) as Address[],
+    tokens: tokens as Address[] | undefined,
     isLoading,
     isError,
     error,
@@ -167,9 +200,66 @@ export function useRemoveToken() {
   };
 }
 
+// Hook for transferring tokens
+export function useTransferToken() {
+  const { address, isConnected } = useAccount();
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const {
+    writeContract,
+    isPending,
+    isError,
+    error,
+    isSuccess: writeSuccess,
+    reset,
+  } = useWriteContract();
+
+  useEffect(() => {
+    if (writeSuccess) {
+      setIsSuccess(true);
+      // Reset after a delay
+      const timer = setTimeout(() => {
+        setIsSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [writeSuccess]);
+
+  const transferToken = async (
+    tokenAddress: Address,
+    toAddress: Address,
+    amount: string
+  ) => {
+    if (!isConnected || !address) {
+      console.error("Wallet not connected");
+      return;
+    }
+
+    try {
+      writeContract({
+        address: WALLET_CONTRACT_ADDRESS,
+        abi: WalletABI,
+        functionName: "transferToken",
+        args: [tokenAddress, toAddress, parseEther(amount)],
+      });
+    } catch (err) {
+      console.error("Error transferring token:", err);
+    }
+  };
+
+  return {
+    transferToken,
+    isPending,
+    isError,
+    error,
+    isSuccess,
+    reset,
+  };
+}
+
 // Hook for getting all token balances
 export function useGetAllBalances() {
-  const { userTokens, isLoading: tokensLoading } = useGetUserTokens();
+  const { tokens, isLoading: tokensLoading } = useGetUserTokens();
   const [tokenBalances, setTokenBalances] = useState<
     Array<{ token: Address; balance: string }>
   >([]);
@@ -178,7 +268,7 @@ export function useGetAllBalances() {
 
   useEffect(() => {
     const fetchBalances = async () => {
-      if (!userTokens || userTokens.length === 0 || !isConnected) {
+      if (!tokens || tokens.length === 0 || !isConnected) {
         setTokenBalances([]);
         setIsLoading(false);
         return;
@@ -189,7 +279,7 @@ export function useGetAllBalances() {
       try {
         // For demo purposes, using dummy data
         // In a real implementation, you'd fetch each balance
-        const balances = userTokens.map((token) => ({
+        const balances = tokens.map((token) => ({
           token,
           balance: "0.01", // Placeholder value
         }));
@@ -205,7 +295,7 @@ export function useGetAllBalances() {
     if (!tokensLoading) {
       fetchBalances();
     }
-  }, [userTokens, tokensLoading, isConnected, address]);
+  }, [tokens, tokensLoading, isConnected, address]);
 
   return {
     tokenBalances,
@@ -215,7 +305,7 @@ export function useGetAllBalances() {
 
 // Unified hook for wallet functionality
 export function useWalletFunctions() {
-  const { userTokens, refetch: refetchTokens } = useGetUserTokens();
+  const { tokens, refetch: refetchTokens } = useGetUserTokens();
   const {
     addToken,
     isPending: isAddPending,
@@ -237,7 +327,7 @@ export function useWalletFunctions() {
   }, [isAddSuccess, isRemoveSuccess, refetchTokens]);
 
   return {
-    userTokens,
+    tokens,
     tokenBalances,
     isLoading,
     addToken,
@@ -246,5 +336,56 @@ export function useWalletFunctions() {
     isRemovePending,
     address,
     isConnected,
+  };
+}
+
+// Hook for sending native ETH
+export function useSendTransaction() {
+  const { address, isConnected } = useAccount();
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const {
+    sendTransaction,
+    isPending,
+    isError,
+    error,
+    isSuccess: wagmiIsSuccess,
+    reset,
+  } = useWagmiSendTransaction();
+
+  useEffect(() => {
+    if (wagmiIsSuccess) {
+      setIsSuccess(true);
+      // Reset after a delay
+      const timer = setTimeout(() => {
+        setIsSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [wagmiIsSuccess]);
+
+  const sendEth = async (toAddress: Address, amount: string) => {
+    if (!isConnected || !address) {
+      console.error("Wallet not connected");
+      return;
+    }
+
+    try {
+      sendTransaction({
+        to: toAddress,
+        value: parseEther(amount),
+      });
+    } catch (err) {
+      console.error("Error sending ETH:", err);
+    }
+  };
+
+  return {
+    sendEth,
+    isPending,
+    isError,
+    error,
+    isSuccess,
+    reset,
   };
 }
