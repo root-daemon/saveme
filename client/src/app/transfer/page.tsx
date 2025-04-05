@@ -112,6 +112,9 @@ export default function TransactionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isConnected, address } = useWalletContext();
   const { prices, loading: pricesLoading } = useCryptoPrice();
+  const [naturalInput, setNaturalInput] = useState(""); // State for natural language input
+  const [isProcessing, setIsProcessing] = useState(false); // State for AI processing status
+  const [processingError, setProcessingError] = useState<string | null>(null); // State for AI processing errors
 
   // For ERC20 token transfers
   const {
@@ -245,9 +248,67 @@ export default function TransactionPage() {
     return `${formatBalance(displayBalance)} ${coinType.symbol}`;
   };
 
+  // --- Function to process natural language input ---
+  const handleProcessInput = async () => {
+    if (!naturalInput) {
+      setProcessingError("Please enter transaction details.");
+      return;
+    }
+    setIsProcessing(true);
+    setProcessingError(null);
+    setStatusMessage(""); // Clear previous transaction status
+
+    try {
+      const response = await fetch("/api/chat", {
+        // Reusing the existing API route for now
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputText: naturalInput }), // Sending input text
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to process input");
+      }
+
+      const data = await response.json();
+
+      // --- Update form fields based on extracted data ---
+      if (data.toAddress) {
+        setToAddress(data.toAddress);
+      }
+      if (data.amount) {
+        setAmount(data.amount);
+      }
+      if (data.symbol) {
+        const selectedCoin = coins.find(
+          (c) => c.symbol.toUpperCase() === data.symbol.toUpperCase()
+        );
+        if (selectedCoin) {
+          setCoinType(selectedCoin);
+        } else {
+          console.warn(
+            `Coin symbol "${data.symbol}" not found in predefined list.`
+          );
+          // Optionally set an error message or default coin
+        }
+      }
+      // Clear the natural input field after processing
+      setNaturalInput("");
+    } catch (err) {
+      console.error("Error processing natural input:", err);
+      setProcessingError((err as Error).message || "An error occurred");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  // --- End of function ---
+
   return (
-    <main className="bg-background text-white min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="absolute top-0 right-4">
+    <main className="bg-background text-white min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="absolute top-4 right-4">
         <Connect />
       </div>
       <form
@@ -269,9 +330,9 @@ export default function TransactionPage() {
                 const availableBalance = parseFloat(displayBalance);
                 const inputElement = e.target;
                 if (inputAmount > availableBalance) {
-                  inputElement.classList.add('text-red-400');
+                  inputElement.classList.add("text-red-400");
                 } else {
-                  inputElement.classList.remove('text-red-400');
+                  inputElement.classList.remove("text-red-400");
                 }
               }}
               className="bg-transparent py-12 text-center text-6xl font-semibold w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-200"
@@ -308,12 +369,13 @@ export default function TransactionPage() {
 
         {statusMessage && (
           <div
-            className={`mb-4 p-2 rounded text-sm ${isError
-              ? "bg-red-900/30 text-red-200"
-              : isSuccess
+            className={`mb-4 p-2 rounded text-sm ${
+              isError
+                ? "bg-red-900/30 text-red-200"
+                : isSuccess
                 ? "bg-green-900/30 text-green-200"
                 : "bg-blue-900/30 text-blue-200"
-              }`}
+            }`}
           >
             {statusMessage}
           </div>
@@ -321,16 +383,51 @@ export default function TransactionPage() {
 
         <button
           type="submit"
-          disabled={!isConnected || isPending || parseFloat(amount) > parseFloat(displayBalance)}
-          className={`${parseFloat(amount) > parseFloat(displayBalance) ? "bg-red-400/10 text-red-400" : "bg-foreground/10 text-foreground hover:bg-foreground/20"} w-full cursor-pointer  py-3 rounded-full font-medium transition disabled:opacity-50 disabled:cursor-not-allowed`}
+          disabled={
+            !isConnected ||
+            isPending ||
+            parseFloat(amount) > parseFloat(displayBalance)
+          }
+          className={`${
+            parseFloat(amount) > parseFloat(displayBalance)
+              ? "bg-red-400/10 text-red-400"
+              : "bg-foreground/10 text-foreground hover:bg-foreground/20"
+          } w-full cursor-pointer  py-3 rounded-full font-medium transition disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {!isConnected
             ? "Connect Wallet to Send"
             : isPending
-              ? "Sending..."
-              : "Send Tokens"}
+            ? "Sending..."
+            : "Send Tokens"}
         </button>
       </form>
+
+      {/* --- Natural Language Input Section --- */}
+      <div className="mt-6 bg-white/5 rounded-3xl p-6 w-full max-w-md shadow-lg">
+        <h2 className="text-lg font-medium mb-4">Describe Transaction</h2>
+        <div className="flex flex-col gap-4">
+          <textarea
+            placeholder="e.g., Send 0.1 ETH to 0x123... or Transfer 50 USDC to vitalik.eth"
+            value={naturalInput}
+            onChange={(e) => setNaturalInput(e.target.value)}
+            className="w-full bg-white/10 rounded-xl px-4 py-3 outline-none resize-none h-24"
+            rows={3}
+          />
+          {processingError && (
+            <div className="p-2 rounded text-sm bg-red-900/30 text-red-200">
+              {processingError}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleProcessInput}
+            disabled={isProcessing}
+            className="w-full bg-blue-600/50 cursor-pointer text-white py-3 rounded-full font-medium transition hover:bg-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isProcessing ? "Processing..." : "Fill Form from Text"}
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence>
         {isModalOpen && (
@@ -342,7 +439,7 @@ export default function TransactionPage() {
             onClick={() => setIsModalOpen(false)}
           >
             <motion.div
-              className="bg-[#0d2012] rounded-2xl p-6 w-full max-w-sm shadow-lg"
+              className="bg-[#0d2012] rounded-2xl p-6 w-full max-w-sm shadow-lg max-h-[60vh] overflow-y-auto"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
