@@ -32,7 +32,7 @@ export const Connect = () => {
                 userSelect: 'none',
               },
             })}
-            className="font-sans font-medium mt-10"
+            className="font-sans font-medium"
           >
             {(() => {
               if (!connected) {

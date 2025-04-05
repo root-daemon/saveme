@@ -1,6 +1,7 @@
 import '@rainbow-me/rainbowkit/styles.css';
 import '../styles/globals.css';
 import { Providers } from './providers';
+import Navbar from '../components/Navbar';
 
 export const metadata = {
   title: 'SaveMe',
@@ -18,7 +19,10 @@ export default function RootLayout({
         <link href="/favicon.ico" rel="icon" />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -309,9 +309,6 @@ export default function TransactionPage() {
 
   return (
     <main className="bg-background text-white min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      <div className="absolute top-4 right-4">
-        <Connect />
-      </div>
       <form
         className="bg-white/5 rounded-3xl p-6 w-full max-w-md shadow-lg"
         onSubmit={handleSubmit}
