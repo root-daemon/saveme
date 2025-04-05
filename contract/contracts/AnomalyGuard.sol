@@ -8,6 +8,7 @@ interface ILiquidityPool {
     function swapEthForTokens() external payable;
 }
 
+// use this after calling the buy from LP contract
 contract AnomalyGuardWallet {
     address public owner;
     IERC20 public token;
