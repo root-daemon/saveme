@@ -34,12 +34,7 @@ export default function TransactionsPage() {
 
           <div className="flex gap-4">
             <Connect />
-            <Link
-              href="/wallet"
-              className="px-6 py-3 rounded-lg bg-foreground/10 text-white hover:bg-foreground/20 transition-colors flex items-center gap-2"
-            >
-              Back to Wallet
-            </Link>
+
           </div>
         </div>
         <div className="bg-foreground/10 p-8 rounded-full">

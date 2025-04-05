@@ -260,9 +260,21 @@ export default function TransactionPage() {
             <input
               type="number"
               placeholder="0"
+              min={0}
+              step={0.01}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="bg-transparent py-12 text-center text-6xl font-semibold w-full outline-none"
+              onChange={(e) => {
+                setAmount(e.target.value);
+                const inputAmount = parseFloat(e.target.value);
+                const availableBalance = parseFloat(displayBalance);
+                const inputElement = e.target;
+                if (inputAmount > availableBalance) {
+                  inputElement.classList.add('text-red-400');
+                } else {
+                  inputElement.classList.remove('text-red-400');
+                }
+              }}
+              className="bg-transparent py-12 text-center text-6xl font-semibold w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-200"
             />
           </div>
           <div
@@ -296,13 +308,12 @@ export default function TransactionPage() {
 
         {statusMessage && (
           <div
-            className={`mb-4 p-2 rounded text-sm ${
-              isError
-                ? "bg-red-900/30 text-red-200"
-                : isSuccess
+            className={`mb-4 p-2 rounded text-sm ${isError
+              ? "bg-red-900/30 text-red-200"
+              : isSuccess
                 ? "bg-green-900/30 text-green-200"
                 : "bg-blue-900/30 text-blue-200"
-            }`}
+              }`}
           >
             {statusMessage}
           </div>
@@ -310,14 +321,14 @@ export default function TransactionPage() {
 
         <button
           type="submit"
-          disabled={!isConnected || isPending}
-          className="w-full bg-foreground/10 cursor-pointer text-foreground py-3 rounded-full font-medium transition hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!isConnected || isPending || parseFloat(amount) > parseFloat(displayBalance)}
+          className={`${parseFloat(amount) > parseFloat(displayBalance) ? "bg-red-400/10 text-red-400" : "bg-foreground/10 text-foreground hover:bg-foreground/20"} w-full cursor-pointer  py-3 rounded-full font-medium transition disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {!isConnected
             ? "Connect Wallet to Send"
             : isPending
-            ? "Sending..."
-            : "Send Tokens"}
+              ? "Sending..."
+              : "Send Tokens"}
         </button>
       </form>
 
