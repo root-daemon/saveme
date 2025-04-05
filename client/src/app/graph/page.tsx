@@ -82,6 +82,7 @@ export default function CryptoChart() {
   const [rugPullInProgress, setRugPullInProgress] = useState<boolean>(false);
   const [rugPullComplete, setRugPullComplete] = useState<boolean>(false);
   const [rugPullStage, setRugPullStage] = useState<number>(0);
+  const [rugPullIntensity, setRugPullIntensity] = useState<number>(30);
 
   const {
     agents,
@@ -232,34 +233,43 @@ export default function CryptoChart() {
               break;
 
             case 3:
-              priceChange = -0.0008 - Math.random() * 0.0005;
-              volatility = 0.0012;
-              newVolume = 350 + Math.random() * 150;
+              priceChange =
+                -1 * rugPullIntensity -
+                Math.random() * (rugPullIntensity * 0.5);
+              volatility = rugPullIntensity * 0.5;
+              newVolume = 100 + Math.random() * 500;
               console.log('Stage 3: Initial sell-off', {
                 priceChange,
                 newPrice: lastPoint.close + priceChange,
+                rugPullIntensity,
               });
               setRugPullStage(4);
               break;
 
             case 4:
-              priceChange = -0.003 - Math.random() * 0.002;
-              volatility = 0.0025;
-              newVolume = 500 + Math.random() * 200;
+              priceChange =
+                -1.5 * rugPullIntensity -
+                Math.random() * (rugPullIntensity * 0.8);
+              volatility = rugPullIntensity * 0.8;
+              newVolume = 200 + Math.random() * 1000;
               console.log('Stage 4: THE CASH OUT', {
                 priceChange,
                 newPrice: lastPoint.close + priceChange,
+                rugPullIntensity,
               });
               setRugPullStage(5);
               break;
 
             case 5:
-              priceChange = -0.0015 - Math.random() * 0.0008;
-              volatility = 0.0015;
-              newVolume = 300 + Math.random() * 100;
+              priceChange =
+                -1.2 * rugPullIntensity -
+                Math.random() * (rugPullIntensity * 0.6);
+              volatility = rugPullIntensity * 0.6;
+              newVolume = 150 + Math.random() * 800;
               console.log('Stage 5: Continued collapse', {
                 priceChange,
                 newPrice: lastPoint.close + priceChange,
+                rugPullIntensity,
               });
               setRugPullStage(6);
               break;
@@ -296,12 +306,12 @@ export default function CryptoChart() {
           }
         }
 
-        const newClose = Math.max(0.0001, lastPoint.close + priceChange);
+        const newClose = Math.max(0.01, lastPoint.close + priceChange);
         const newOpen = lastPoint.close;
         const newHigh =
-          Math.max(0.0001, newOpen, newClose) + Math.random() * volatility;
+          Math.max(100, newOpen, newClose) + Math.random() * volatility;
         const newLow = Math.max(
-          0.00005,
+          0.005,
           Math.min(newOpen, newClose) - Math.random() * volatility * 0.5,
         );
 
@@ -612,6 +622,34 @@ export default function CryptoChart() {
           >
             {showAgents ? 'Hide Agents' : 'Show Agents'}
           </Button>
+
+          {/* Intensity control */}
+          <div className="flex items-center ml-4 space-x-2">
+            <span className="text-white text-xs">Drop Intensity:</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441] h-8 px-2"
+              onClick={() =>
+                setRugPullIntensity(Math.max(10, rugPullIntensity - 10))
+              }
+            >
+              -
+            </Button>
+            <span className="text-white text-xs w-8 text-center">
+              {rugPullIntensity}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441] h-8 px-2"
+              onClick={() =>
+                setRugPullIntensity(Math.min(100, rugPullIntensity + 10))
+              }
+            >
+              +
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
