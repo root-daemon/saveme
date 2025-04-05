@@ -28,8 +28,6 @@ interface Agent {
   aggressiveness: number;
   active: boolean;
   color: string;
-  walletAddress: string;
-  privateKey: string;
   lastAction?: TradeAction;
   initialBalance?: number;
   initialTokens?: number;
@@ -57,9 +55,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
         aggressiveness: 8,
         active: true,
         color: '#FF6B6B',
-        walletAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-        privateKey:
-          '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
       },
       {
         id: 'bot1',
@@ -71,9 +66,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
         aggressiveness: 6,
         active: true,
         color: '#4ECDC4',
-        walletAddress: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
-        privateKey:
-          '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
       },
       {
         id: 'retail1',
@@ -85,9 +77,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
         aggressiveness: 4,
         active: true,
         color: '#FFD166',
-        walletAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-        privateKey:
-          '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a',
       },
       {
         id: 'manipulator1',
@@ -99,9 +88,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
         aggressiveness: 9,
         active: true,
         color: '#6A0572',
-        walletAddress: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
-        privateKey:
-          '0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6',
       },
       {
         id: 'bot2',
@@ -113,9 +99,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
         aggressiveness: 7,
         active: true,
         color: '#1A535C',
-        walletAddress: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65',
-        privateKey:
-          '0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a',
       },
     ];
 
@@ -127,7 +110,10 @@ export function useTradingAgents(initialPrice: number = 0.004) {
       clearTimeout(rugPullTimeoutRef.current);
     }
 
+    // Longer initial delay (1-3 minutes) before the first rug pull can occur
+    // This ensures users have time to observe normal market behavior first
     setTimeout(() => {
+      // Random time between 1-12 minutes for the actual rug pull
       const rugPullTime = 60000 + Math.random() * 660000;
 
       setIsRugPullScheduled(true);
@@ -157,14 +143,14 @@ export function useTradingAgents(initialPrice: number = 0.004) {
           });
         }, 1000);
       }, rugPullTime - 15000);
-    }, 60000 + Math.random() * 120000);
+    }, 60000 + Math.random() * 120000); // 1-3 minute initial delay
   };
 
-  const generateTrade = async (
+  const generateTrade = (
     agent: Agent,
     currentPrice: number,
     priceChange: number,
-  ): Promise<TradeAction | null> => {
+  ): TradeAction | null => {
     if (Math.random() > agent.aggressiveness / 10) {
       return null;
     }
@@ -172,102 +158,6 @@ export function useTradingAgents(initialPrice: number = 0.004) {
     let tradeType: 'buy' | 'sell' = 'buy';
     let tradeAmount = 0;
 
-    // First determine trade type and amount based on strategy
-    switch (agent.strategy) {
-      case 'momentum':
-        tradeType = priceChange >= 0 ? 'buy' : 'sell';
-        tradeAmount =
-          Math.abs(priceChange) *
-          agent.aggressiveness *
-          (Math.random() * 10 + 5);
-        break;
-
-      case 'contrarian':
-        tradeType = priceChange >= 0 ? 'sell' : 'buy';
-        tradeAmount =
-          Math.abs(priceChange) *
-          agent.aggressiveness *
-          (Math.random() * 8 + 3);
-        break;
-
-      case 'random':
-        tradeType = Math.random() > 0.5 ? 'buy' : 'sell';
-        tradeAmount = Math.random() * agent.aggressiveness * 10;
-        break;
-
-      case 'manipulative':
-        if (isRugPullScheduled && rugPullCountdown && rugPullCountdown < 10) {
-          tradeType = 'sell';
-          tradeAmount = agent.tokens * 0.8 * (Math.random() * 0.2 + 0.8);
-        } else if (isRugPullScheduled) {
-          tradeType = 'buy';
-          tradeAmount =
-            (agent.balance / currentPrice) * 0.1 * (Math.random() * 0.5 + 0.5);
-        } else {
-          const manipulationDirection = Math.random() > 0.7;
-          tradeType = manipulationDirection ? 'buy' : 'sell';
-          tradeAmount = manipulationDirection
-            ? (agent.balance / currentPrice) *
-              0.05 *
-              (Math.random() * 0.5 + 0.5)
-            : agent.tokens * 0.05 * (Math.random() * 0.5 + 0.5);
-        }
-        break;
-    }
-
-    // Validate trade amount
-    if (tradeType === 'buy') {
-      const maxPossibleAmount = agent.balance / currentPrice;
-      tradeAmount = Math.min(tradeAmount, maxPossibleAmount);
-    } else {
-      tradeAmount = Math.min(tradeAmount, agent.tokens);
-    }
-
-    if (tradeAmount < 0.1) {
-      return null;
-    }
-
-    // Prepare contract write
-    const { config } = usePrepareContractWrite({
-      address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-      abi: [
-        {
-          inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-          ],
-          name: 'buy',
-          outputs: [],
-          stateMutability: 'payable',
-          type: 'function',
-        },
-        {
-          inputs: [
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-          ],
-          name: 'sell',
-          outputs: [],
-          stateMutability: 'nonpayable',
-          type: 'function',
-        },
-      ],
-      functionName: tradeType,
-      args: [tradeAmount],
-      account: agent.walletAddress,
-      value:
-        tradeType === 'buy'
-          ? BigInt(Math.floor(tradeAmount * currentPrice * 1e18))
-          : undefined,
-    });
-
-    const { write } = useContractWrite(config);
-
-    if (!write) {
-      console.error(
-        `Failed to prepare ${tradeType} transaction for ${agent.name}`,
-      );
-      return null;
-    }
-
     switch (agent.strategy) {
       case 'momentum':
         tradeType = priceChange >= 0 ? 'buy' : 'sell';
@@ -321,20 +211,14 @@ export function useTradingAgents(initialPrice: number = 0.004) {
       return null;
     }
 
-    try {
-      await write?.();
-      return {
-        type: tradeType,
-        amount: tradeAmount,
-        price: currentPrice,
-        timestamp: Date.now(),
-        agentId: agent.id,
-        agentName: agent.name,
-      };
-    } catch (error) {
-      console.error(`Trade failed for ${agent.name}:`, error);
-      return null;
-    }
+    return {
+      type: tradeType,
+      amount: tradeAmount,
+      price: currentPrice,
+      timestamp: Date.now(),
+      agentId: agent.id,
+      agentName: agent.name,
+    };
   };
 
   const updateAgentBalance = (agentId: string, trade: TradeAction) => {
@@ -413,7 +297,7 @@ export function useTradingAgents(initialPrice: number = 0.004) {
     const minActiveTraders = Math.max(1, Math.floor(agents.length * 0.3));
     let activeTraderCount = 0;
 
-    agents.forEach(async (agent) => {
+    agents.forEach((agent) => {
       if (agent.active) {
         const baseTradeChance = isRugPullScheduled ? 0.6 : 0.8;
         const tradeChance =
@@ -426,11 +310,7 @@ export function useTradingAgents(initialPrice: number = 0.004) {
           : agent.aggressiveness / 15;
 
         if (tradeChance < aggressivenessThreshold) {
-          const trade = await generateTrade(
-            agent,
-            currentPrice,
-            randomMovement,
-          );
+          const trade = generateTrade(agent, currentPrice, randomMovement);
           if (trade) {
             newTrades.push(trade);
             updateAgentBalance(agent.id, trade);
@@ -485,13 +365,15 @@ export function useTradingAgents(initialPrice: number = 0.004) {
 
     if (isRugPullScheduled) {
       if (rugPullCountdown && rugPullCountdown < 10) {
+        // During final countdown, make price drop dramatically
         volatility *= 3;
-
+        // Ensure price always goes down during cashout by using a larger negative value
         priceChange =
           -Math.abs(priceChange) - (Math.random() * 0.0012 + 0.0003);
       } else {
+        // Even before final countdown, price should start decreasing
         volatility *= 1.5;
-
+        // Ensure price always goes down by making priceChange negative
         priceChange =
           -Math.abs(priceChange) * 0.5 - (Math.random() * 0.0002 + 0.00005);
       }
