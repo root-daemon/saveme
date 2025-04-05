@@ -24,7 +24,8 @@
     - **Swap Tokens**: Converts assets via the LiquidityPool.
     - **Return Funds to Owner**: Ensures user assets are secured.
   
-      ![SaveMe Protocol Overview - visual selection (2)](https://github.com/user-attachments/assets/0c971871-cf43-40dc-b270-11d46bfd2aea)
+![saveme arch diagram](https://github.com/user-attachments/assets/4661aeb8-8eb4-4b62-824e-c5edfdfafebc)
+
 
 ## User Actions
 - **Connect Wallet**: Initiate interaction with the protocol by connecting a crypto wallet.
