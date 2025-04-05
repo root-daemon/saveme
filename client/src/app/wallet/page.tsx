@@ -29,6 +29,9 @@ import {
   formatBalance,
 } from "../../hooks/useContractFunctions";
 import { useWalletContext } from "../../context/WalletContext";
+import { useTransactionHistory } from "../../hooks/useTransactionHistory";
+import TransactionList from "../../components/wallet/TransactionList";
+import Link from "next/link";
 
 // Example of a component using the individual hooks
 const TokenBalance = ({ tokenAddress }: { tokenAddress: `0x${string}` }) => {
@@ -201,6 +204,12 @@ export default function WalletDashboard() {
     loading: pricesLoading,
     error: pricesError,
   } = useCryptoPrice();
+
+  const {
+    transactions,
+    isLoading: txLoading,
+    error: txError,
+  } = useTransactionHistory();
 
   const [tokenAddress, setTokenAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -459,63 +468,29 @@ export default function WalletDashboard() {
 
       {/* Recent Transactions */}
       <section className="mb-24">
-        <BlurText
-          text="Recent Transactions"
-          delay={0.01}
-          animateBy="letters"
-          direction="top"
-          className="text-3xl md:text-4xl font-semibold mb-8 text-white"
-        />
-
-        <div className="bg-background/20 backdrop-blur-sm rounded-lg border border-foreground/10">
-          {pricesLoading || walletLoading ? (
-            <div className="p-6 text-center text-white">
-              Loading transactions...
-            </div>
-          ) : pricesError ? (
-            <div className="p-6 text-center text-red-500">{pricesError}</div>
-          ) : !isConnected ? (
-            <div className="p-6 text-center text-white">
-              Connect your wallet to view transactions
-            </div>
-          ) : (
-            Array(3)
-              .fill(null)
-              .map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-6 border-b border-foreground/10 last:border-0"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="bg-foreground/10 p-3 rounded-full">
-                      {index % 2 === 0 ? (
-                        <FaChevronRight className="text-green-400" />
-                      ) : (
-                        <FaExchangeAlt className="text-blue-400" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-medium text-white">
-                        {index % 2 === 0 ? "Received" : "Sent"}
-                      </h3>
-                      <p className="text-foreground text-sm">
-                        {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white font-medium">
-                      {formatPrice(Math.random() * 1000)}
-                    </p>
-                    <p className="text-foreground text-sm">
-                      {index % 2 === 0 ? "From: " : "To: "}0x...
-                      {Math.random().toString(16).slice(2, 6)}
-                    </p>
-                  </div>
-                </div>
-              ))
+        <div className="flex justify-between items-center mb-5">
+          <BlurText
+            text="Recent Transactions"
+            delay={0.01}
+            animateBy="letters"
+            direction="top"
+            className="text-3xl md:text-4xl font-semibold text-white"
+          />
+          {isConnected && (
+            <Link
+              href="/transactions"
+              className="flex items-center gap-2 bg-foreground/10 hover:bg-foreground/20 rounded-lg px-4 py-2 text-white transition-colors"
+            >
+              <FaHistory /> View All
+            </Link>
           )}
         </div>
+
+        <TransactionList
+          limit={3}
+          showViewAll={true}
+          onViewAll={() => (window.location.href = "/transactions")}
+        />
       </section>
 
       {/* Quick Actions */}
