@@ -52,6 +52,21 @@ contract LiquidityPool {
         emit Swapped(msg.sender, tokenAmount, ethAmount);
     }
 
+    function swapEthForTokens() external payable {
+        require(msg.value > 0, "Must send ETH");
+
+        uint256 tokenAmount = getTokenSwapRate(msg.value);
+        require(token.balanceOf(address(this)) >= tokenAmount, "Not enough tokens in pool");
+
+        require(token.transfer(msg.sender, tokenAmount), "Token transfer failed");
+
+        emit Swapped(msg.sender, tokenAmount, msg.value);
+    }
+
+    function getTokenSwapRate(uint256 ethAmount) public view returns (uint256) {
+        return (ethAmount * token.balanceOf(address(this))) / address(this).balance;
+    }
+
     function getSwapRate(uint256 tokenAmount) public view returns (uint256) {
         return (tokenAmount * address(this).balance) / token.balanceOf(address(this));
     }
