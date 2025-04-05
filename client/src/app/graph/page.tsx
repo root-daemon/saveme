@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, ChevronDown, AlertTriangle } from 'lucide-react';
+import { FaEthereum } from 'react-icons/fa';
 
-// Define candlestick data structure
 interface CandlestickData {
   date: string;
   open: number;
@@ -15,88 +15,86 @@ interface CandlestickData {
   volume: number;
 }
 
-// Function to generate a rug pull pattern
 const generateRugPullData = (): CandlestickData[] => {
   const data: CandlestickData[] = [];
   const startDate = new Date('2024-05-01');
   const endDate = new Date('2025-03-31');
 
-  // Number of days between start and end
   const daysDiff = Math.floor(
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  // Initial price
+
   let price = 25 + Math.random() * 5;
 
-  // Generate data for each day
+
   for (let i = 0; i <= daysDiff; i++) {
     const currentDate = new Date(startDate);
     currentDate.setDate(startDate.getDate() + i);
 
-    // Skip weekends to simulate trading days (optional)
+
     if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
       continue;
     }
 
-    // Determine phase of the rug pull
+
     const phase = i / daysDiff;
 
     let priceChange = 0;
     let volatility = 0;
 
-    // Phase 1: Initial accumulation (sideways with slight uptrend)
+
     if (phase < 0.2) {
       priceChange = (Math.random() - 0.45) * 1.5;
       volatility = 1.5;
     }
-    // Phase 2: First pump (moderate uptrend)
+
     else if (phase < 0.3) {
       priceChange = Math.random() * 2 - 0.3;
       volatility = 3;
     }
-    // Phase 3: Consolidation
+
     else if (phase < 0.4) {
       priceChange = (Math.random() - 0.5) * 3;
       volatility = 2;
     }
-    // Phase 4: Major pump (steep uptrend)
+
     else if (phase < 0.5) {
       priceChange = Math.random() * 4 - 0.5;
       volatility = 4;
     }
-    // Phase 5: Peak and initial dump
+
     else if (phase < 0.6) {
       priceChange = (Math.random() - 0.7) * 6;
       volatility = 8;
     }
-    // Phase 6: Major dump (rug pull)
+
     else if (phase < 0.7) {
       priceChange = (Math.random() - 0.8) * 5;
       volatility = 6;
     }
-    // Phase 7: Aftermath (low volatility, slight recovery attempts)
+
     else {
       priceChange = (Math.random() - 0.45) * 2;
       volatility = 3;
     }
 
-    // Update price
+
     price = Math.max(5, price + priceChange);
 
-    // Generate candlestick data
+
     const open = price;
     const close = price + priceChange;
     const high = Math.max(open, close) + Math.random() * volatility;
     const low = Math.min(open, close) - Math.random() * volatility;
 
-    // Generate volume (higher during pumps and dumps)
+
     let volume = Math.random() * 100;
     if (phase > 0.4 && phase < 0.7) {
       volume *= 3;
     }
 
-    // Add to data array
+
     data.push({
       date: currentDate.toISOString().split('T')[0],
       open,
@@ -107,18 +105,18 @@ const generateRugPullData = (): CandlestickData[] => {
     });
   }
 
-  // Ensure the rug pull pattern by manually adjusting some key points
+
   if (data.length > 50) {
-    // Find index around 50% of the data
+
     const peakIndex = Math.floor(data.length * 0.55);
 
-    // Create a dramatic peak
+
     data[peakIndex].high = 75 + Math.random() * 5;
     data[peakIndex].close = 70 + Math.random() * 5;
     data[peakIndex].open = 60 + Math.random() * 5;
     data[peakIndex].low = 58 + Math.random() * 5;
 
-    // Adjust surrounding days to create a smooth peak
+
     for (let i = 1; i <= 10; i++) {
       if (peakIndex - i >= 0) {
         const factor = (10 - i) / 10;
@@ -149,7 +147,7 @@ const generateRugPullData = (): CandlestickData[] => {
       }
     }
 
-    // Create the sharp drop (rug pull)
+
     const rugPullIndex = peakIndex + 11;
     if (rugPullIndex < data.length) {
       data[rugPullIndex].open = 55 + Math.random() * 5;
@@ -168,25 +166,25 @@ export default function CryptoChart() {
   const [timeframe, setTimeframe] = useState<string>('1Y');
   const [isLive, setIsLive] = useState<boolean>(true);
 
-  // Add states for rug pull simulation
+
   const [rugPullTriggered, setRugPullTriggered] = useState<boolean>(false);
   const [rugPullInProgress, setRugPullInProgress] = useState<boolean>(false);
   const [rugPullComplete, setRugPullComplete] = useState<boolean>(false);
   const [rugPullStage, setRugPullStage] = useState<number>(0);
 
-  // Reference to animation interval
+
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to trigger the rug pull
+
   const triggerRugPull = () => {
     if (rugPullTriggered || rugPullInProgress || rugPullComplete) return;
 
-    console.log('🚨 RUG PULL TRIGGERED 🚨');
+    console.log('🚨 CASH OUT TRIGGERED 🚨');
     setRugPullTriggered(true);
     setRugPullStage(0);
 
-    // Log the current state of the market before the rug pull
-    console.log('Market state before rug pull:', {
+
+    console.log('Market state before cash out:', {
       currentPrice,
       lastCandles: data.slice(-5).map((d) => ({
         date: d.date,
@@ -199,20 +197,20 @@ export default function CryptoChart() {
     });
   };
 
-  // Modify the useEffect that initializes data to also set up the animation
+
   useEffect(() => {
     const rugPullData = generateRugPullData();
     setData(rugPullData);
     setCurrentPrice(rugPullData[rugPullData.length - 1].close);
 
-    // Clean up interval on component unmount
+
     return () => {
       if (animationIntervalRef.current)
         clearInterval(animationIntervalRef.current);
     };
   }, []);
 
-  // Separate useEffect for animation to handle rug pull logic
+
   useEffect(() => {
     if (!isLive) {
       if (animationIntervalRef.current) {
@@ -230,7 +228,7 @@ export default function CryptoChart() {
         const newDate = new Date(lastPoint.date);
         newDate.setDate(newDate.getDate() + 1);
 
-        // Skip weekends
+
         if (newDate.getDay() === 0) newDate.setDate(newDate.getDate() + 1);
         if (newDate.getDay() === 6) newDate.setDate(newDate.getDate() + 2);
 
@@ -238,13 +236,13 @@ export default function CryptoChart() {
         let volatility = 0;
         let newVolume = 0;
 
-        // Handle rug pull stages if triggered
+
         if (rugPullTriggered && !rugPullComplete) {
           setRugPullInProgress(true);
 
-          // Different stages of the rug pull
+
           switch (rugPullStage) {
-            // Stage 0: Initial pump to attract investors
+
             case 0:
               priceChange = 3 + Math.random() * 2;
               volatility = 2;
@@ -256,7 +254,7 @@ export default function CryptoChart() {
               setRugPullStage(1);
               break;
 
-            // Stage 1: Continued pump with higher volume
+
             case 1:
               priceChange = 4 + Math.random() * 3;
               volatility = 3;
@@ -268,7 +266,7 @@ export default function CryptoChart() {
               setRugPullStage(2);
               break;
 
-            // Stage 2: Peak - massive volume, slight price increase
+
             case 2:
               priceChange = 1 + Math.random() * 2;
               volatility = 5;
@@ -280,7 +278,7 @@ export default function CryptoChart() {
               setRugPullStage(3);
               break;
 
-            // Stage 3: Initial sell-off - price starts to drop
+
             case 3:
               priceChange = -5 - Math.random() * 3;
               volatility = 8;
@@ -292,19 +290,19 @@ export default function CryptoChart() {
               setRugPullStage(4);
               break;
 
-            // Stage 4: THE RUG PULL - massive price drop
+
             case 4:
               priceChange = -20 - Math.random() * 15;
               volatility = 15;
               newVolume = 500 + Math.random() * 200;
-              console.log('Stage 4: THE RUG PULL', {
+              console.log('Stage 4: THE CASH OUT', {
                 priceChange,
                 newPrice: lastPoint.close + priceChange,
               });
               setRugPullStage(5);
               break;
 
-            // Stage 5: Continued collapse
+
             case 5:
               priceChange = -10 - Math.random() * 5;
               volatility = 10;
@@ -316,7 +314,7 @@ export default function CryptoChart() {
               setRugPullStage(6);
               break;
 
-            // Stage 6: Aftermath - low prices, some volatility
+
             case 6:
               priceChange = (Math.random() - 0.6) * 3;
               volatility = 4;
@@ -327,9 +325,9 @@ export default function CryptoChart() {
               });
               setRugPullComplete(true);
 
-              // Log the final state after rug pull
-              console.log('🔥 RUG PULL COMPLETE 🔥');
-              console.log('Market state after rug pull:', {
+
+              console.log('🔥 CASH OUT COMPLETE 🔥');
+              console.log('Market state after cash out:', {
                 finalPrice: lastPoint.close + priceChange,
                 priceDropPercentage:
                   ((lastPoint.close + priceChange) / currentPrice - 1) * 100,
@@ -343,20 +341,20 @@ export default function CryptoChart() {
               break;
 
             default:
-              // Normal market behavior after rug pull
+
               priceChange = (Math.random() - 0.5) * 2;
               volatility = 2;
               newVolume = 50 + Math.random() * 50;
           }
         } else {
-          // Normal market behavior
+
           const trend = Math.random() > 0.5 ? 1 : -1;
           volatility = 1 + Math.random() * 2;
           priceChange = trend * Math.random() * volatility;
           newVolume = Math.random() * 100;
         }
 
-        // Ensure price doesn't go below 1
+
         const newClose = Math.max(1, lastPoint.close + priceChange);
         const newOpen = lastPoint.close;
         const newHigh =
@@ -367,18 +365,18 @@ export default function CryptoChart() {
           date: newDate.toISOString().split('T')[0],
           open: newOpen,
           high: newHigh,
-          low: Math.max(0.5, newLow), // Ensure low doesn't go below 0.5
+          low: Math.max(0.5, newLow),
           close: newClose,
           volume: newVolume,
         };
 
-        // Update current price
+
         setCurrentPrice(newClose);
 
-        // Return new array with the oldest point removed and the new point added
+
         return [...prevData.slice(1), newPoint];
       });
-    }, 1000); // Update every second
+    }, 1000);
 
     return () => {
       if (animationIntervalRef.current) {
@@ -388,7 +386,7 @@ export default function CryptoChart() {
     };
   }, [isLive, rugPullTriggered, rugPullStage, rugPullComplete, currentPrice]);
 
-  // Function to draw the chart using canvas
+
   useEffect(() => {
     if (data.length === 0) return;
 
@@ -398,26 +396,26 @@ export default function CryptoChart() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions
+
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    // Clear canvas
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Add rug pull background effect if in progress
+
     if (rugPullInProgress && !rugPullComplete && rugPullStage >= 3) {
-      // Create flashing red background effect for rug pull
+
       const opacity = 0.05 + Math.sin(Date.now() / 200) * 0.05;
       ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw grid lines
+
     ctx.strokeStyle = '#1e2530';
     ctx.lineWidth = 1;
 
-    // Horizontal grid lines
+
     for (let i = 0; i <= 5; i++) {
       const y = i * (canvas.height / 5);
       ctx.beginPath();
@@ -426,16 +424,16 @@ export default function CryptoChart() {
       ctx.stroke();
     }
 
-    // Find min and max prices for scaling
+
     let minPrice = Math.min(...data.map((d) => d.low));
     let maxPrice = Math.max(...data.map((d) => d.high));
 
-    // Add some padding
+
     const padding = (maxPrice - minPrice) * 0.1;
     minPrice -= padding;
     maxPrice += padding;
 
-    // Draw price scale on the right
+
     ctx.fillStyle = '#8f9ba8';
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
@@ -446,7 +444,7 @@ export default function CryptoChart() {
       ctx.fillText(price.toFixed(1), canvas.width - 10, y + 15);
     }
 
-    // Filter data based on selected timeframe
+
     let filteredData = data;
     if (timeframe !== 'All') {
       const now = new Date(data[data.length - 1].date);
@@ -470,10 +468,10 @@ export default function CryptoChart() {
       filteredData = data.filter((d) => new Date(d.date) >= startDate);
     }
 
-    // Draw candlesticks with animation effect
+
     const candleWidth = canvas.width / filteredData.length;
 
-    // Draw a subtle gradient background to indicate movement direction
+
     if (isLive && filteredData.length > 1) {
       const gradientWidth = 100;
       const gradient = ctx.createLinearGradient(
@@ -484,11 +482,11 @@ export default function CryptoChart() {
       );
 
       if (rugPullInProgress && rugPullStage >= 3 && !rugPullComplete) {
-        // Red gradient during rug pull
+
         gradient.addColorStop(0, 'rgba(255, 0, 0, 0)');
         gradient.addColorStop(1, 'rgba(255, 0, 0, 0.1)');
       } else {
-        // Normal gradient
+
         gradient.addColorStop(0, 'rgba(46, 213, 115, 0)');
         gradient.addColorStop(1, 'rgba(46, 213, 115, 0.05)');
       }
@@ -505,7 +503,7 @@ export default function CryptoChart() {
     filteredData.forEach((candle, i) => {
       const x = i * candleWidth;
 
-      // Scale prices to canvas height
+
       const open =
         canvas.height -
         ((candle.open - minPrice) / (maxPrice - minPrice)) * canvas.height;
@@ -519,27 +517,27 @@ export default function CryptoChart() {
         canvas.height -
         ((candle.low - minPrice) / (maxPrice - minPrice)) * canvas.height;
 
-      // Draw wick
+
       ctx.beginPath();
       ctx.moveTo(x + candleWidth / 2, high);
       ctx.lineTo(x + candleWidth / 2, low);
       ctx.strokeStyle = candle.open > candle.close ? '#ff4976' : '#00c853';
       ctx.stroke();
 
-      // Draw body
+
       ctx.fillStyle = candle.open > candle.close ? '#ff4976' : '#00c853';
       const bodyHeight = Math.abs(open - close);
       const bodyY = Math.min(open, close);
       ctx.fillRect(x + 1, bodyY, candleWidth - 2, bodyHeight);
 
-      // Add highlight effect to the newest candle if in live mode
+
       if (isLive && i === filteredData.length - 1) {
-        // Special highlight for rug pull candles
+
         if (rugPullInProgress && rugPullStage >= 3 && !rugPullComplete) {
           ctx.strokeStyle = '#ff0000';
           ctx.lineWidth = 3;
 
-          // Add pulsing effect
+
           const pulseSize = 1 + Math.sin(Date.now() / 200) * 0.5;
           ctx.strokeRect(
             x + 1 - pulseSize,
@@ -556,7 +554,7 @@ export default function CryptoChart() {
       }
     });
 
-    // Draw volume bars at the bottom
+
     const volumeHeight = canvas.height * 0.15;
     const maxVolume = Math.max(...filteredData.map((d) => d.volume));
 
@@ -566,7 +564,7 @@ export default function CryptoChart() {
       const height = (candle.volume / maxVolume) * volumeHeight;
       const y = canvas.height - height;
 
-      // Color volume bars differently during rug pull
+
       if (
         rugPullInProgress &&
         i === filteredData.length - 1 &&
@@ -582,7 +580,7 @@ export default function CryptoChart() {
     });
     ctx.globalAlpha = 1.0;
 
-    // Draw current price line
+
     const currentPriceY =
       canvas.height -
       ((currentPrice - minPrice) / (maxPrice - minPrice)) * canvas.height;
@@ -597,19 +595,19 @@ export default function CryptoChart() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw current price label with animation if live
+
     ctx.fillStyle =
       rugPullInProgress && rugPullStage >= 3 && !rugPullComplete
         ? '#ff4976'
         : isLive
-        ? '#4caf50'
-        : '#2d3748';
+          ? '#4caf50'
+          : '#2d3748';
     ctx.fillRect(canvas.width - 70, currentPriceY - 12, 60, 24);
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.fillText(currentPrice.toFixed(1), canvas.width - 40, currentPriceY + 4);
 
-    // Draw month labels at the bottom
+
     ctx.fillStyle = '#8f9ba8';
     ctx.textAlign = 'center';
     ctx.font = '12px Arial';
@@ -649,9 +647,9 @@ export default function CryptoChart() {
       }
     });
 
-    // Add "Live" indicator in the top-right if in live mode
+
     if (isLive) {
-      // Draw a pulsing effect for the live indicator
+
       const now = Date.now();
       const pulseSize = 5 + Math.sin(now / 200) * 2;
 
@@ -662,39 +660,11 @@ export default function CryptoChart() {
       ctx.fill();
     }
 
-    // Add rug pull warning if in progress
-    if (rugPullInProgress && !rugPullComplete) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(canvas.width / 2 - 100, 20, 200, 40);
 
-      ctx.fillStyle = '#ff4976';
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('RUG PULL IN PROGRESS', canvas.width / 2, 45);
 
-      // Add flashing effect
-      if (Math.floor(Date.now() / 500) % 2 === 0) {
-        ctx.fillStyle = '#ff4976';
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2 - 110, 40, 8, 0, Math.PI * 2);
-        ctx.fill();
 
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2 + 110, 40, 8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
 
-    // Add "Rug Pull Complete" message if finished
-    if (rugPullComplete) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(canvas.width / 2 - 100, 20, 200, 40);
 
-      ctx.fillStyle = '#ff4976';
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('RUG PULL COMPLETE', canvas.width / 2, 45);
-    }
   }, [
     data,
     currentPrice,
@@ -708,62 +678,35 @@ export default function CryptoChart() {
 
   return (
     <div className="space-y-4 flex flex-col items-center justify-center py-24">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
+      <div className="flex justify-between w-full px-52 gap-32 items-center">
+        <div className="flex space-x-2 items-center justify-center">
+          <FaEthereum className='text-foreground text-2xl' />
+          <span className="text-white mr-48 text-xl font-semibold">
+            ETH/USD
+          </span>
           <Button
             variant="outline"
             className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441]"
           >
             Price
           </Button>
-          <Button
-            variant="outline"
-            className="bg-transparent border-0 text-gray-400 hover:bg-[#2a3441]"
-          >
-            Market cap
-          </Button>
-          {/* Add live indicator */}
-          <div className="flex items-center ml-4">
-            <div
-              className={`w-3 h-3 rounded-full mr-2 ${
-                isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
-              }`}
-            ></div>
-            <span className="text-sm text-gray-400">LIVE</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-2 h-7 bg-transparent border-0 text-gray-400 hover:bg-[#2a3441]"
-              onClick={() => setIsLive(!isLive)}
-            >
-              {isLive ? 'Pause' : 'Resume'}
-            </Button>
-          </div>
+
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Add rug pull trigger button */}
           <Button
             variant="outline"
-            className={`${
-              rugPullTriggered
-                ? 'bg-red-900 text-red-100 border-red-700'
-                : 'bg-[#1e2530] border-0 text-white hover:bg-red-900 hover:text-red-100'
-            }`}
+            className={`${rugPullTriggered
+              ? 'bg-red-900 text-red-100 border-red-700'
+              : 'bg-[#1e2530] border-0 text-white hover:bg-red-900 hover:text-red-100'
+              } fixed bottom-12 right-12`}
             onClick={triggerRugPull}
             disabled={rugPullTriggered || !isLive}
           >
             <AlertTriangle className="h-4 w-4 mr-2" />
-            {rugPullTriggered ? 'Rug Pull Triggered' : 'Trigger Rug Pull'}
+            {rugPullTriggered ? 'Cash out Triggered' : 'Trigger Cash out'}
           </Button>
 
-          <Button
-            variant="outline"
-            className="bg-[#1e2530] border-0 text-white hover:bg-[#2a3441]"
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            TradingView
-          </Button>
 
           <Tabs
             defaultValue="1Y"
@@ -818,9 +761,8 @@ export default function CryptoChart() {
           </Button>
           <Button
             variant="outline"
-            className={`bg-${
-              isLive ? '[#2a3441] text-white' : 'transparent text-gray-400'
-            } border-0 hover:bg-[#2a3441]`}
+            className={`bg-${isLive ? '[#2a3441] text-white' : 'transparent text-gray-400'
+              } border-0 hover:bg-[#2a3441]`}
             onClick={() => setIsLive(!isLive)}
           >
             {isLive ? 'Live' : 'Static'}
@@ -828,40 +770,27 @@ export default function CryptoChart() {
         </div>
       </div>
 
-      <div className="relative bg-[#0e1117] rounded-lg overflow-hidden border border-[#1e2530]">
-        <div className="h-[500px] w-full relative">
+      <div className="relative rounded-lg overflow-hidden">
+        <div className="h-[700px] w-full relative">
           <canvas id="chart" className="w-full h-full"></canvas>
 
-          {/* Watermark */}
-          <div className="absolute bottom-4 right-4 flex items-center opacity-50">
-            <div className="w-6 h-6 bg-[#2d3748] rounded-full flex items-center justify-center mr-2">
-              <div className="w-3 h-3 bg-[#8f9ba8] rounded-full"></div>
-            </div>
-            <span className="text-[#8f9ba8] text-sm font-semibold">
-              CoinMarketCap
-            </span>
-          </div>
 
-          {/* Rug pull warning overlay */}
           {rugPullInProgress && !rugPullComplete && (
             <div className="absolute inset-0 pointer-events-none">
               <div
-                className={`absolute top-4 left-4 bg-black bg-opacity-70 p-3 rounded-lg border ${
-                  rugPullStage >= 3
-                    ? 'border-red-600 animate-pulse'
-                    : 'border-yellow-600'
-                }`}
+                className={`absolute top-4 left-4 bg-black/70 bg-opacity-70 p-3 rounded-lg border ${rugPullStage >= 3
+                  ? 'border-red-400 animate-pulse'
+                  : 'border-orange-400'
+                  }`}
               >
                 <div className="flex items-center">
                   <AlertTriangle
-                    className={`h-5 w-5 mr-2 ${
-                      rugPullStage >= 3 ? 'text-red-500' : 'text-yellow-500'
-                    }`}
+                    className={`h-5 w-5 mr-2 ${rugPullStage >= 3 ? 'text-red-400' : 'text-orange-400'
+                      }`}
                   />
                   <span
-                    className={`font-bold ${
-                      rugPullStage >= 3 ? 'text-red-500' : 'text-yellow-500'
-                    }`}
+                    className={`font-bold ${rugPullStage >= 3 ? 'text-red-400' : 'text-orange-400'
+                      }`}
                   >
                     {rugPullStage >= 3
                       ? 'MAJOR SELL-OFF IN PROGRESS'
@@ -877,14 +806,13 @@ export default function CryptoChart() {
             </div>
           )}
 
-          {/* Rug pull complete overlay */}
           {rugPullComplete && (
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-4 left-4 bg-black bg-opacity-70 p-3 rounded-lg border border-red-600">
-                <div className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
-                  <span className="font-bold text-red-500">
-                    RUG PULL COMPLETE
+              <div className="absolute top-4 left-4 bg-black/70 bg-opacity-70 p-3 rounded-xl border border-red-400">
+                <div className="flex items-center ">
+                  <AlertTriangle className="h-5 w-5 mr-2 text-red-400" />
+                  <span className="font-bold text-red-400">
+                    CASH OUT COMPLETE
                   </span>
                 </div>
                 <div className="text-xs text-gray-300 mt-1">
@@ -895,34 +823,6 @@ export default function CryptoChart() {
           )}
         </div>
       </div>
-
-      {/* Add debug panel to show console logs in UI */}
-      {(rugPullTriggered || rugPullInProgress || rugPullComplete) && (
-        <div className="mt-4 bg-gray-900 border border-gray-800 rounded-lg p-4">
-          <h3 className="text-red-500 font-bold mb-2 flex items-center">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Rug Pull Debug Data
-          </h3>
-          <div className="bg-black p-3 rounded font-mono text-xs text-gray-300 max-h-[200px] overflow-auto">
-            <div>
-              🚨 Check browser console for detailed rug pull data logs 🚨
-            </div>
-            <div className="mt-2 text-yellow-400">
-              Current Stage:{' '}
-              {rugPullComplete ? 'Complete' : `Stage ${rugPullStage}`}
-            </div>
-            <div className="mt-1 text-cyan-400">
-              Current Price: {currentPrice.toFixed(2)}
-            </div>
-            {rugPullComplete && (
-              <div className="mt-2 text-red-400">
-                Price Drop:{' '}
-                {((currentPrice / (data[0]?.close || 0) - 1) * 100).toFixed(2)}%
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
